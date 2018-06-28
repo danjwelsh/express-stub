@@ -1,6 +1,7 @@
-const mongoose = require('mongoose')
+import * as mongoose from 'mongoose'
+const Schema = mongoose.Schema
 
-let userModel = {
+export const userModel = new Schema ({
   username: {
     type: 'String',
     unique: true,
@@ -14,6 +15,6 @@ let userModel = {
   iv: {
     type: 'String'
   }
-}
+})
 
-module.exports = mongoose.Schema(userModel)
+// export userModel

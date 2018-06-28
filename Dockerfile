@@ -18,16 +18,18 @@ RUN npm install
 
 
 # Install nodemon
-RUN npm install -g nodemon
+RUN npm install -g nodemon typescript
 
 COPY .env /app/.env
-COPY app.js /app/app.js
+COPY app.ts /app/app.ts
+COPY tsconfig.json /app/tsconfig.json
 COPY web /app/web
 
+RUN tsc
 
 # Expose port 80
 EXPOSE 80
 
 
 # Start the server.
-CMD nodemon app.js
+CMD nodemon dist/app.js

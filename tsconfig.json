@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "outDir": "dist",
+        "lib": ["ES2015"]
+    },
+    "compileOnSave": true,
+    "exclude": [
+        "node_modules"
+    ]
+}

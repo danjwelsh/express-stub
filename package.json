@@ -27,11 +27,18 @@
     "dotenv": "^5.0.1",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.1.2",
     "npm": "^6.1.0",
     "require-directory": "^2.1.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.4",
+    "@types/dotenv": "^4.0.3",
+    "@types/express": "^4.16.0",
+    "@types/jsonwebtoken": "^7.2.7",
+    "@types/mongoose": "^5.0.18",
+    "@types/node": "^10.3.6",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.12.0",

@@ -1,10 +1,16 @@
-const fs = require('fs')
-const path = require('path')
+import * as fs from 'fs'
+import * as path from 'path'
+// import {App} from './../server'
 
-module.exports = function (app) {
+/**
+ * Add routes to express
+ * @param  __dirname [description]
+ * @return           [description]
+ */
+const addRoutes = (app) => {
   fs.readdirSync(__dirname)
     .filter(function (file) {
-      return (file.indexOf('.') !== 0) && (file !== 'index.js')
+      return (file.indexOf('.') !== 0) && (!(file.includes('index')))
     })
     .forEach((file) => {
       let routeName = '/' + file.split('.')[0]
@@ -19,3 +25,5 @@ module.exports = function (app) {
     })
   return app
 }
+
+export default addRoutes
