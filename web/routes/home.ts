@@ -6,9 +6,8 @@ let router
  * @param  app Express.express
  * @return     Router
  */
-function getRoutes(app): express.Router {
+function home(): express.Router {
   router = express.Router()
-
   router.get('/', async function (req, res, next) {
     return res.send('Hello World')
   })
@@ -16,4 +15,4 @@ function getRoutes(app): express.Router {
   return router
 }
 
-module.exports = getRoutes
+export default home

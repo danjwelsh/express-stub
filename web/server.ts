@@ -5,7 +5,6 @@ import * as cors from 'cors'
 import * as dotenv from 'dotenv'
 import * as handler from './middleware/handler'
 import * as mongoose from 'mongoose'
-import * as schemas from './schemas'
 import addRoutes from './routes'
 dotenv.load()
 
@@ -16,8 +15,6 @@ class App {
     constructor() {
       this.express = express()
       mongoose.connect(process.env.MONGO_URI)
-      console.log(schemas)
-      // this.schemas = this.initDatabase()
       this.prepareStatic()
       this.setViewEngine()
       this.setBodyParser()
@@ -62,18 +59,6 @@ class App {
     private setErrorHandler(): void {
       this.express.use(handler.handleResponseDebug)
     }
-
-    // private initDatabase (): void {
-    //   // return new Promise((resolve, reject) => {
-    //   mongoose.connect(process.env.MONGO_URI).then(() => {
-    //     console.log('connection open')
-    //
-    //     // this.schemas = schemas
-    //     return schemas
-    //   }).catch((error: Error) => {
-    //     console.error(error)
-    //   })
-    // }
 }
 
 export default new App().express

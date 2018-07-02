@@ -1,12 +1,11 @@
 import * as express from 'express'
 import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
-// import './../../response'
-import { Response } from './../response'
-import schemas from './../schemas'
+import { Response } from '../../response'
+import models from '../../models'
 let routes: express.Router
 
-const getRoutes = (app) => {
+const auth = () => {
   routes = express.Router()
   routes.post('/register', async function (req, res, next) {
     // Get username and password
@@ -20,11 +19,9 @@ const getRoutes = (app) => {
     }
 
     // check for an existing user
-    console.log('checking stored user')
     let sUser
     try {
-      // console.log(schemas['User'])
-      sUser = await schemas['User'].findOne({username})
+      sUser = await models.User.findOne({username})
       console.log('got stored user')
     } catch (error) {
       console.error(error)
@@ -36,7 +33,6 @@ const getRoutes = (app) => {
 
     if (sUser) {
       let e = new Error('400')
-      // e.status = 400
       return next(e)
     }
 
@@ -44,7 +40,7 @@ const getRoutes = (app) => {
     let iv
     const hash = crypto.createHash('sha256')
     try {
-      iv = crypto.randomBytes(16).toString('ascii')
+      iv = crypto.randomBytes(16).toString('hex')
       hash.update(`${iv}${password}`)
       password = hash.digest('hex')
     } catch (e) {
@@ -52,14 +48,9 @@ const getRoutes = (app) => {
       return next(e)
     }
 
-    // create the user
-    let user = new schemas['User']({
-      username: username,
-      password: password,
-      iv: iv
-    })
+    let user = null;
     try {
-      user.save()
+      user = await models.User.create({username, password, iv})
       console.log(user)
     } catch (e) {
       console.error(e)
@@ -69,11 +60,10 @@ const getRoutes = (app) => {
 
     // create a payload
     const payload = {
-      id: user.id,
-      username: user.username
+      user: user
     }
     // create and sign token against the app secret
-    const token = jwt.sign(payload, app.get('secret'), {
+    const token = jwt.sign(payload, process.env.SECRET, {
       expiresIn: '1 day' // expires in 24 hours
     })
 
@@ -96,7 +86,7 @@ const getRoutes = (app) => {
     let user
     try {
       // console.log('getting user')
-      user = await app.schemas.User.findOne({username})
+      user = await models.User.findOne({username})
       // console.log('user')
     } catch (e) {
       return next(e)
@@ -111,7 +101,8 @@ const getRoutes = (app) => {
     const hash = crypto.createHash('sha256')
     try {
       hash.update(`${user.iv}${password}`)
-      password = hash.digest(password)
+      password = hash.digest('hex')
+      console.log(user.password, password)
       // Compare passwords and abort if no match
       if (user.password !== password) {
         let e = new Error('403')
@@ -129,17 +120,14 @@ const getRoutes = (app) => {
     }
 
     // create and sign token against the app secret
-    const token = jwt.sign(payload, app.get('secret'), {
+    const token = jwt.sign(payload, process.env.SECRET, {
       expiresIn: '1 day' // expires in 24 hours
     })
 
-    // let response = responses.success
     let response = new Response(200, 'success', false, { token })
-    // response.payload = { token }
     return res.json(response)
   })
-
   return routes
 }
 
-module.exports = getRoutes
+export default auth

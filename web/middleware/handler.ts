@@ -1,6 +1,5 @@
-// import responses from './../response'
 import * as express from "express"
-import {Response} from './../response'
+import { Response } from './../response'
 
 const handleResponse: express.ErrorRequestHandler = (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const code = parseInt(err.message)
@@ -25,9 +24,9 @@ const handleResponseDebug: express.ErrorRequestHandler = (err: Error, req: expre
 }
 
 /**
- * [getError description]
- * @param  code [description]
- * @return      [description]
+ * Get message from error code
+ * @param  code number
+ * @return      Response
  */
 function getError(code: number): Response {
   let message
@@ -52,6 +51,7 @@ function getError(code: number): Response {
   return new Response(code, message, true, null)
 }
 
+// Export functions
 export {
   handleResponseDebug,
   handleResponse
