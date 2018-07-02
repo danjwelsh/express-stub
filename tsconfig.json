@@ -9,7 +9,8 @@
     "compileOnSave": true,
     "include": [
         "web/**/*",
-        "app.ts"
+        "app.ts",
+        "test/**/*"
     ],
     "exclude": [
         "node_modules"

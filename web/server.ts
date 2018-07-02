@@ -8,13 +8,19 @@ import * as mongoose from 'mongoose'
 import addRoutes from './routes'
 dotenv.load()
 
-class App {
+export class App {
     public express: express.Express
     public schemas: any
 
     constructor() {
       this.express = express()
-      mongoose.connect(process.env.MONGO_URI)
+      // Select database
+      if (process.env.TEST === 'true') {
+        mongoose.connect(process.env.MONGO_URI_TEST)
+      } else {
+        mongoose.connect(process.env.MONGO_URI)
+      }
+
       this.prepareStatic()
       this.setViewEngine()
       this.setBodyParser()
@@ -36,7 +42,6 @@ class App {
     }
 
     private addRoutes (app: express.Express): void {
-      console.log(typeof addRoutes)
       this.express = addRoutes(app)
     }
 

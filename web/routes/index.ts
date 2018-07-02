@@ -14,7 +14,6 @@ import user from './api/user'
 const addRoutes = (app: Express) => {
   app.use('/', home())
   app.use('/api/auth', auth())
-  console.log(user())
   app.use('/api/user', user())
   return app
 }

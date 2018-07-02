@@ -16,11 +16,22 @@ const user = () => {
     const userId: string = res.locals.user.id
     let user: IUser
     try {
-      user = await models.User.findOne({_id: userId})
+      user = await models.User.findOne({ _id: userId })
     } catch (e) {
       return next(e)
     }
     return res.json(new Response(200, 'success', false, { user }))
+  })
+
+  router.delete('/destroy', async function (req, res, next) {
+    const userId: string = res.locals.user.id
+    try {
+      await models.User.deleteOne({ _id: userId })
+    } catch (e) {
+      return next(e)
+    }
+
+    return res.json(new Response(200, 'success', false, {}))
   })
 
   return router

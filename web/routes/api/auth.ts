@@ -22,14 +22,11 @@ const auth = () => {
     let sUser
     try {
       sUser = await models.User.findOne({username})
-      console.log('got stored user')
     } catch (error) {
       console.error(error)
       error.message = '500'
       return next(error)
     }
-
-    console.log('stored user', sUser)
 
     if (sUser) {
       let e = new Error('400')
@@ -51,7 +48,6 @@ const auth = () => {
     let user = null;
     try {
       user = await models.User.create({username, password, iv})
-      console.log(user)
     } catch (e) {
       console.error(e)
       e.message = '500'
@@ -102,7 +98,6 @@ const auth = () => {
     try {
       hash.update(`${user.iv}${password}`)
       password = hash.digest('hex')
-      console.log(user.password, password)
       // Compare passwords and abort if no match
       if (user.password !== password) {
         let e = new Error('403')
