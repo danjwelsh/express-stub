@@ -7,5 +7,5 @@ env:
 - DEBUG=true
 - TEST=true
 services: mongodb
-before_install:
+before_script:
 - tsc
