@@ -37,14 +37,9 @@ const auth = () => {
     // Hash user's given password after mixing with a random id
     let iv: string
     const hash: crypto.Hash = crypto.createHash('sha256')
-    try {
-      iv = crypto.randomBytes(16).toString('hex')
-      hash.update(`${iv}${password}`)
-      password = hash.digest('hex')
-    } catch (e) {
-      e.message = '500'
-      return next(e)
-    }
+    iv = crypto.randomBytes(16).toString('hex')
+    hash.update(`${iv}${password}`)
+    password = hash.digest('hex')
 
     let user = null;
     try {
@@ -94,17 +89,12 @@ const auth = () => {
 
     // Hash given password with matching user's stored iv
     const hash: crypto.Hash = crypto.createHash('sha256')
-    try {
-      hash.update(`${user.iv}${password}`)
-      password = hash.digest('hex')
-      // Compare passwords and abort if no match
-      if (user.password !== password) {
-        res.locals.customErrorMessage = 'password or email is incorrect'
-        let e = new Error('401')
-        return next(e)
-      }
-    } catch (e) {
-      e.status = 500
+    hash.update(`${user.iv}${password}`)
+    password = hash.digest('hex')
+    // Compare passwords and abort if no match
+    if (user.password !== password) {
+      res.locals.customErrorMessage = 'password or email is incorrect'
+      let e = new Error('401')
       return next(e)
     }
 

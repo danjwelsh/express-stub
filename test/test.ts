@@ -81,11 +81,25 @@ describe('api', function () {
       })
     })
 
-    describe('Reject incorrect credentials', function () {
-      it("Should reject request if invalid credentials are given", function (done) {
+    describe('Reject incorrect password', function () {
+      it("Should reject request if invalid password is given", function (done) {
         const userData = {
           username: 'tester',
           password: 'password'
+        }
+        Axios.post(`${URL}/api/auth/authenticate`, userData).then(() => {
+        }).catch((error: AxiosError) => {
+          expect(error.response.status).to.equal(401)
+          done()
+        })
+      })
+    })
+
+    describe('Reject incorrect username', function () {
+      it("Should reject request if invalid username is given", function (done) {
+        const userData = {
+          username: 'tester1',
+          password: 'secret'
         }
         Axios.post(`${URL}/api/auth/authenticate`, userData).then(() => {
         }).catch((error: AxiosError) => {

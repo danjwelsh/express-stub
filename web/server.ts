@@ -14,7 +14,6 @@ export class App {
     constructor() {
       this.express = express()
 
-      // Select database
       mongoose.connect(process.env.MONGO_URI)
 
       this.prepareStatic()
