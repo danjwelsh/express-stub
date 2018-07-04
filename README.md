@@ -1,6 +1,10 @@
 # express-stub
 > A template for a Typescript Express.js API.
 
+[![Build Status](https://travis-ci.com/danjwelsh/express-stub.svg?branch=master)](https://travis-ci.com/danjwelsh/express-stub)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+
+
 ## Download
 Download the stub from GitHub.
 ```bash
