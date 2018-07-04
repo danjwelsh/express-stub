@@ -4,7 +4,7 @@
   "description": "Stub for an Express.js API",
   "main": "dist/app.js",
   "scripts": {
-    "test": "nyc mocha dist/test/test.js",
+    "test": "nyc mocha dist/test/test.js --exit",
     "build": "tsc"
   },
   "repository": {
