@@ -23,13 +23,12 @@ const auth = () => {
     try {
       sUser = await models.User.findOne({username})
     } catch (error) {
-      console.error(error)
       error.message = '500'
       return next(error)
     }
 
     if (sUser) {
-      let e = new Error('400')
+      let e = new Error('403')
       return next(e)
     }
 
@@ -49,7 +48,6 @@ const auth = () => {
     try {
       user = await models.User.create({username, password, iv})
     } catch (e) {
-      console.error(e)
       e.message = '500'
       return next(e)
     }
@@ -81,15 +79,14 @@ const auth = () => {
     // Look for user with matching username
     let user
     try {
-      // console.log('getting user')
       user = await models.User.findOne({username})
-      // console.log('user')
     } catch (e) {
       return next(e)
     }
 
     if (!user) {
-      let e = new Error('400')
+      res.locals.customErrorMessage = 'password or email is incorrect'
+      let e = new Error('401')
       return next(e)
     }
 
@@ -100,7 +97,8 @@ const auth = () => {
       password = hash.digest('hex')
       // Compare passwords and abort if no match
       if (user.password !== password) {
-        let e = new Error('403')
+        res.locals.customErrorMessage = 'password or email is incorrect'
+        let e = new Error('401')
         return next(e)
       }
     } catch (e) {

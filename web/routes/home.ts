@@ -8,7 +8,7 @@ let router
  */
 function home(): express.Router {
   router = express.Router()
-  router.get('/', async function (req, res, next) {
+  router.get('/', function (req, res, next) {
     return res.send('Hello World')
   })
 

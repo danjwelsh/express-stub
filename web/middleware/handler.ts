@@ -2,25 +2,32 @@ import * as express from "express"
 import { Response } from './../response'
 
 const handleResponse: express.ErrorRequestHandler = (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const code = parseInt(err.message)
+  const code: number = parseInt(err.message)
+
   let response = getError(code)
-  response.payload = null
+  if (res.locals.customErrorMessage) {
+    response.message = res.locals.customErrorMessage
+  }
 
   res.status(code)
-  res.json(response)
-  return next()
+  return res.json(response)
 }
 
 const handleResponseDebug: express.ErrorRequestHandler = (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const code = parseInt(err.message)
+  const code: number = parseInt(err.message)
+
   let response = getError(code)
+  if (res.locals.customErrorMessage) {
+    response.message = res.locals.customErrorMessage
+  }
   response.payload = err.stack
 
-  console.log(err.stack)
+  if (process.env.TEST !== 'true') {
+    console.error(err.stack)
+  }
 
   res.status(code)
-  res.json(response)
-  return next()
+  return res.json(response)
 }
 
 /**

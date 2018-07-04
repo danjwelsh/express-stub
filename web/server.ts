@@ -10,16 +10,12 @@ dotenv.load()
 
 export class App {
     public express: express.Express
-    public schemas: any
 
     constructor() {
       this.express = express()
+
       // Select database
-      if (process.env.TEST === 'true') {
-        mongoose.connect(process.env.MONGO_URI_TEST)
-      } else {
-        mongoose.connect(process.env.MONGO_URI)
-      }
+      mongoose.connect(process.env.MONGO_URI)
 
       this.prepareStatic()
       this.setViewEngine()
@@ -65,5 +61,3 @@ export class App {
       this.express.use(handler.handleResponseDebug)
     }
 }
-
-export default new App().express

@@ -13,6 +13,9 @@ const user = () => {
   router.use(checkToken.checkToken)
 
   router.get('/me', async function (req, res, next) {
+    if (res.locals.error) {
+      return next(new Error(`${res.locals.error}`))
+    }
     const userId: string = res.locals.user.id
     let user: IUser
     try {
@@ -24,6 +27,9 @@ const user = () => {
   })
 
   router.delete('/destroy', async function (req, res, next) {
+    if (res.locals.error) {
+      return next(new Error(`${res.locals.error}`))
+    }
     const userId: string = res.locals.user.id
     try {
       await models.User.deleteOne({ _id: userId })
