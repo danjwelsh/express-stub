@@ -1,4 +1,5 @@
 import * as express from 'express'
+import {NextFunction, Request, Response} from "express";
 let router
 
 /**
@@ -6,14 +7,13 @@ let router
  * @param  app Express.express
  * @return     Router
  */
-function getRoutes(app): express.Router {
+function home(): express.Router {
   router = express.Router()
-
-  router.get('/', async function (req, res, next) {
+  router.get('/', (req: Request, res: Response, next: NextFunction) => {
     return res.send('Hello World')
   })
 
   return router
 }
 
-module.exports = getRoutes
+export default home

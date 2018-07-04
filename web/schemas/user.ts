@@ -1,20 +1,30 @@
-import * as mongoose from 'mongoose'
-const Schema = mongoose.Schema
+import { Schema, Document } from 'mongoose'
 
-export const userModel = new Schema ({
+const schemaOptions = {
+  timestamps: true
+}
+
+export interface IUser extends Document {
+  username: string
+  password: string
+  iv: string
+  createdAt: string
+  updatedAt: string
+}
+
+export const UserSchema = new Schema({
   username: {
-    type: 'String',
-    unique: true,
+    type: String,
     required: true,
-    dropDups: true
+    index: true,
+    unique: true
   },
   password: {
-    type: 'String',
+    type: String,
     required: true
   },
   iv: {
-    type: 'String'
+    type: String,
+    required: true
   }
-})
-
-// export userModel
+}, schemaOptions)

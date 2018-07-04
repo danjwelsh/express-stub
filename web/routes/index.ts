@@ -1,28 +1,18 @@
-import * as fs from 'fs'
-import * as path from 'path'
-// import {App} from './../server'
+import { Express } from 'express'
+
+import home from './home'
+import auth from './api/auth'
+import user from './api/user'
 
 /**
- * Add routes to express
- * @param  __dirname [description]
- * @return           [description]
+ * Add routes to app
+ * @param {e.Express} app
+ * @returns {e.Express}
  */
-const addRoutes = (app) => {
-  fs.readdirSync(__dirname)
-    .filter(function (file) {
-      return (file.indexOf('.') !== 0) && (!(file.includes('index')))
-    })
-    .forEach((file) => {
-      let routeName = '/' + file.split('.')[0]
-      if (routeName === '/home') {
-        routeName = '/'
-      }
-
-      let routes = require(path.join(__dirname, file))
-      let initRoutes = routes(app)
-
-      app.use(routeName, initRoutes)
-    })
+const addRoutes = (app: Express) => {
+  app.use('/', home())
+  app.use('/api/auth', auth())
+  app.use('/api/user', user())
   return app
 }
 

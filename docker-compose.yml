@@ -9,16 +9,17 @@ services:
       - "./app.ts:/app/app.ts"
       - "./.env:/app/.env"
       - "./dist:/app/dist"
+      - "./test:/app/test"
       depends_on:
         - mongo
       links:
         - mongo
-      environment:
-        MONGO_URI: mongodb://mongo/stub
+      # environment:
+      #   MONGO_URI: mongodb://mongo/stub
   mongo:
     image: mongo
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - 'mongo:/data/db'
 volumes:

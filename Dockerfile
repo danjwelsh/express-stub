@@ -24,8 +24,9 @@ COPY .env /app/.env
 COPY app.ts /app/app.ts
 COPY tsconfig.json /app/tsconfig.json
 COPY web /app/web
+COPY test /app/test
 
-RUN tsc
+RUN npm run build
 
 # Expose port 80
 EXPOSE 80
