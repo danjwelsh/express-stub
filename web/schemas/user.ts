@@ -4,6 +4,9 @@ const schemaOptions = {
   timestamps: true
 }
 
+/**
+ * User interface extending the Mongoose.Document
+ */
 export interface IUser extends Document {
   username: string
   password: string
@@ -12,6 +15,10 @@ export interface IUser extends Document {
   updatedAt: string
 }
 
+/**
+ * Model a user schema in the database
+ * @type {module:mongoose.Schema}
+ */
 export const UserSchema = new Schema({
   username: {
     type: String,

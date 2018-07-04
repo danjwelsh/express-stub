@@ -3,9 +3,8 @@ import {NextFunction, Request, Response} from "express";
 let router
 
 /**
- * Get routes
- * @param  app Express.express
- * @return     Router
+ * Set the home route
+ * @returns {e.Router}
  */
 function home(): express.Router {
   router = express.Router()

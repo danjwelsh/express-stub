@@ -7,8 +7,16 @@ import { IUser } from "../../schemas/user"
 
 let routes: Router
 
+/**
+ * Router for authorisation
+ * @returns {e.Router}
+ */
 const auth = () => {
   routes = Router()
+
+  /**
+   * Register a new user
+   */
   routes.post('/register', async (req: Request, res: Response, next: NextFunction) => {
     // Get username and password
     const username: string = req.body.username
@@ -41,7 +49,7 @@ const auth = () => {
     hash.update(`${iv}${password}`)
     password = hash.digest('hex')
 
-    let user = null;
+    let user: IUser
     try {
       user = await models.User.create({username, password, iv})
     } catch (e) {
@@ -66,7 +74,6 @@ const auth = () => {
 
   /**
    * Authenticate a user and return a JWT token
-   * @type {Object}
    */
   routes.post('/authenticate', async (req: Request, res: Response, next: NextFunction) => {
     // Get username and password from request
