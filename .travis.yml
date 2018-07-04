@@ -2,10 +2,11 @@ language: node_js
 node_js:
  - "node"
 env:
-- MONGO_URI=mongodb://127.0.0.1/stub
-- SECRET=thisismyappsecret
-- DEBUG=true
-- TEST=true
+  global:
+    - MONGO_URI=mongodb://127.0.0.1/stub
+    - SECRET=thisismyappsecret
+    - DEBUG=true
+    - TEST=true
 services: mongodb
 before_script:
 - tsc
