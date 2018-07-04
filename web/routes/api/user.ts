@@ -1,18 +1,21 @@
 import * as express from 'express'
 import models from '../../models'
 import {IUser} from '../../schemas/user'
-import { Response } from '../../response'
+import { Reply } from '../../reply'
 
-import * as checkToken from '../../middleware/authenticate'
+import checkToken from '../../middleware/authenticate'
+import {Request} from "express";
+import {Response} from "express";
+import {NextFunction} from "express";
 
 let router : express.Router
 
 const user = () => {
   router = express.Router()
 
-  router.use(checkToken.checkToken)
+  router.use(checkToken)
 
-  router.get('/me', async function (req, res, next) {
+  router.get('/me', async (req: Request, res: Response, next: NextFunction) => {
     if (res.locals.error) {
       return next(new Error(`${res.locals.error}`))
     }
@@ -23,7 +26,7 @@ const user = () => {
     } catch (e) {
       return next(e)
     }
-    return res.json(new Response(200, 'success', false, { user }))
+    return res.json(new Reply(200, 'success', false, { user }))
   })
 
   router.delete('/destroy', async function (req, res, next) {
@@ -37,10 +40,9 @@ const user = () => {
       return next(e)
     }
 
-    return res.json(new Response(200, 'success', false, {}))
+    return res.json(new Reply(200, 'success', false, {}))
   })
 
   return router
 }
-
 export default user

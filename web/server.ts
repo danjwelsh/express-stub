@@ -58,6 +58,6 @@ export class App {
     }
 
     private setErrorHandler(): void {
-      this.express.use(handler.handleResponseDebug)
+      this.express.use(handler.handleResponse)
     }
 }

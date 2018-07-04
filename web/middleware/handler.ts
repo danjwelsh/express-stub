@@ -1,5 +1,5 @@
 import * as express from "express"
-import { Response } from './../response'
+import { Reply } from '../reply'
 
 const handleResponse: express.ErrorRequestHandler = (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const code: number = parseInt(err.message)
@@ -9,18 +9,9 @@ const handleResponse: express.ErrorRequestHandler = (err: Error, req: express.Re
     response.message = res.locals.customErrorMessage
   }
 
-  res.status(code)
-  return res.json(response)
-}
-
-const handleResponseDebug: express.ErrorRequestHandler = (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const code: number = parseInt(err.message)
-
-  let response = getError(code)
-  if (res.locals.customErrorMessage) {
-    response.message = res.locals.customErrorMessage
+  if (process.env.DEBUG === 'true') {
+    response.payload = err.stack
   }
-  response.payload = err.stack
 
   if (process.env.TEST !== 'true') {
     console.error(err.stack)
@@ -33,9 +24,9 @@ const handleResponseDebug: express.ErrorRequestHandler = (err: Error, req: expre
 /**
  * Get message from error code
  * @param  code number
- * @return      Response
+ * @return      Reply
  */
-function getError(code: number): Response {
+function getError(code: number): Reply {
   let message
   switch (code) {
     case 401:
@@ -55,11 +46,10 @@ function getError(code: number): Response {
       break
   }
 
-  return new Response(code, message, true, null)
+  return new Reply(code, message, true, null)
 }
 
 // Export functions
 export {
-  handleResponseDebug,
   handleResponse
 }

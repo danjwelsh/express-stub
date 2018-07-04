@@ -1,4 +1,5 @@
 import * as express from 'express'
+import {NextFunction, Request, Response} from "express";
 let router
 
 /**
@@ -8,7 +9,7 @@ let router
  */
 function home(): express.Router {
   router = express.Router()
-  router.get('/', function (req, res, next) {
+  router.get('/', (req: Request, res: Response, next: NextFunction) => {
     return res.send('Hello World')
   })
 

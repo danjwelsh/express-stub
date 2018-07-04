@@ -1,25 +1,27 @@
-import * as express from 'express'
+import { Router, Response, Request, NextFunction} from 'express'
 import * as crypto from 'crypto'
 import * as jwt from 'jsonwebtoken'
-import { Response } from '../../response'
+import { Reply } from '../../reply'
 import models from '../../models'
-let routes: express.Router
+import { IUser } from "../../schemas/user"
+
+let routes: Router
 
 const auth = () => {
-  routes = express.Router()
-  routes.post('/register', async function (req, res, next) {
+  routes = Router()
+  routes.post('/register', async (req: Request, res: Response, next: NextFunction) => {
     // Get username and password
-    const username = req.body.username
-    let password = req.body.password
+    const username: string = req.body.username
+    let password: string = req.body.password
 
     // abort if either username or password are null
     if (!username || !password) {
-      let e = new Error('400')
+      let e: Error = new Error('400')
       return next(e)
     }
 
     // check for an existing user
-    let sUser
+    let sUser: IUser
     try {
       sUser = await models.User.findOne({username})
     } catch (error) {
@@ -28,13 +30,13 @@ const auth = () => {
     }
 
     if (sUser) {
-      let e = new Error('403')
+      let e: Error = new Error('403')
       return next(e)
     }
 
     // Hash user's given password after mixing with a random id
-    let iv
-    const hash = crypto.createHash('sha256')
+    let iv: string
+    const hash: crypto.Hash = crypto.createHash('sha256')
     try {
       iv = crypto.randomBytes(16).toString('hex')
       hash.update(`${iv}${password}`)
@@ -62,7 +64,7 @@ const auth = () => {
     })
 
     // let response = responses.success
-    let response = new Response(200, 'success', false, { user, token })
+    let response = new Reply(200, 'success', false, { user, token })
     // response.payload = { user, token }
     return res.json(response)
   })
@@ -71,13 +73,13 @@ const auth = () => {
    * Authenticate a user and return a JWT token
    * @type {Object}
    */
-  routes.post('/authenticate', async (req, res, next) => {
+  routes.post('/authenticate', async (req: Request, res: Response, next: NextFunction) => {
     // Get username and password from request
-    const username = req.body.username
-    let password = req.body.password
+    const username: string = req.body.username
+    let password: string = req.body.password
 
     // Look for user with matching username
-    let user
+    let user: IUser
     try {
       user = await models.User.findOne({username})
     } catch (e) {
@@ -91,7 +93,7 @@ const auth = () => {
     }
 
     // Hash given password with matching user's stored iv
-    const hash = crypto.createHash('sha256')
+    const hash: crypto.Hash = crypto.createHash('sha256')
     try {
       hash.update(`${user.iv}${password}`)
       password = hash.digest('hex')
@@ -117,7 +119,7 @@ const auth = () => {
       expiresIn: '1 day' // expires in 24 hours
     })
 
-    let response = new Response(200, 'success', false, { token })
+    let response = new Reply(200, 'success', false, { token })
     return res.json(response)
   })
   return routes

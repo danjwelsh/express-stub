@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken'
 import * as express from 'express'
 import { IUser } from '../schemas/user'
 
-const checkToken = function (req: express.Request, res: express.Response, next: express.NextFunction) {
+export default function (req: express.Request, res: express.Response, next: express.NextFunction) {
   const token : string = req.body.token || req.query.token || req.headers['x-access-token'] || req.params.token
 
   if (token) {
@@ -21,8 +21,4 @@ const checkToken = function (req: express.Request, res: express.Response, next: 
     res.locals.error = 401
     next()
   }
-}
-
-export {
-  checkToken
 }

@@ -1,50 +1,51 @@
-import { expect } from 'chai'
-import { describe } from 'mocha'
-import { App } from "../web/server"
-import Axios from 'axios'
-import { Server } from 'http'
+import {expect} from 'chai'
+import {describe} from 'mocha'
+import {App} from "../web/server"
+import Axios, {AxiosError, AxiosResponse} from 'axios'
+import {Server} from 'http'
 
 let server: Server
 const URL: string = 'http://localhost:8888'
 let token: string
 
-describe('api', function() {
-	// let server = null
-	before(function() {
-		const port: number = 8888
+describe('api', function () {
+  // let server = null
+  before(function () {
+    const port: number = 8888
     process.env.TEST = 'true'
 
     try {
       server = new App().express.listen(port)
-    } catch (e) { console.error(e) }
-	})
+    } catch (e) {
+      console.error(e)
+    }
+  })
 
   after(async function () {
     await server.close()
   })
 
-	// For the home routes.
-	describe('Home', function () {
-
-		// Test the landing page renders
-		describe('Render', function () {
-			it("Should return the home page from '/'", function(done) {
-				Axios.get(`${URL}/`).then((response) => {
+  // For the home routes.
+  describe('Home', function () {
+    // Test the landing page renders
+    describe('Render', function () {
+      it("Should return the home page from '/'", function (done) {
+        Axios.get(`${URL}/`).then((response: AxiosResponse) => {
           expect(response.status).to.equal(200)
           done()
         })
-			})
-		})
-	})
+      })
+    })
+  })
 
   describe('Auth', function () {
     describe('Register', function () {
-      it("Should register a user and return a token", function(done) {
+      it("Should register a user and return a token", function (done) {
         const userData = {
           username: 'tester',
           password: 'secret'
         }
-        Axios.post(`${URL}/api/auth/register`, userData).then((response) => {
+        Axios.post(`${URL}/api/auth/register`, userData).then((response: AxiosResponse) => {
           expect(response.data.payload.token).to.have.length.above(10)
           done()
         })
@@ -52,13 +53,13 @@ describe('api', function() {
     })
 
     describe('Rejects creating existing account', function () {
-      it("Should prevent the user from creating an account with an existing username", function(done) {
+      it("Should prevent the user from creating an account with an existing username", function (done) {
         const userData = {
           username: 'tester',
           password: 'secret'
         }
         Axios.post(`${URL}/api/auth/register`, userData).then(() => {
-        }).catch((error) => {
+        }).catch((error: AxiosError) => {
           expect(error.response.status).to.equal(403)
           done()
         })
@@ -71,9 +72,10 @@ describe('api', function() {
           username: 'tester',
           password: 'secret'
         }
-        Axios.post(`${URL}/api/auth/authenticate`, userData).then((response) => {
+        Axios.post(`${URL}/api/auth/authenticate`, userData).then((response: AxiosResponse) => {
           expect(response.data.payload.token).to.have.length.above(10)
           token = response.data.payload.token
+
           done()
         })
       })
@@ -86,7 +88,7 @@ describe('api', function() {
           password: 'password'
         }
         Axios.post(`${URL}/api/auth/authenticate`, userData).then(() => {
-        }).catch((error) => {
+        }).catch((error: AxiosError) => {
           expect(error.response.status).to.equal(401)
           done()
         })
@@ -94,7 +96,7 @@ describe('api', function() {
     })
   })
 
-  describe('Middleware', function() {
+  describe('Middleware', function () {
     describe('Authentication', function () {
       describe('Require token', function () {
         it("Should reject request if no token is given", function (done) {
@@ -110,7 +112,7 @@ describe('api', function() {
         it("Should reject request if the token is invalid", function (done) {
           const invToken = `${token}0`
           Axios.get(`${URL}/api/user/me`, {headers: {'x-access-token': invToken}}).then(() => {
-          }).catch((error) => {
+          }).catch((error: AxiosError) => {
             expect(error.response.status).to.equal(401)
             done()
           })
@@ -119,10 +121,10 @@ describe('api', function() {
     })
   })
 
-  describe ('User', function () {
+  describe('User', function () {
     describe('Profile', function () {
       it('Should return the users information', function (done) {
-        Axios.get(`${URL}/api/user/me`, {headers: {'x-access-token': token}}).then((response) => {
+        Axios.get(`${URL}/api/user/me`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
           expect(response.data.payload.user.username).to.equal('tester')
           done()
         })
@@ -131,7 +133,7 @@ describe('api', function() {
 
     describe('Destroy', function () {
       it('Should delete users profile', function (done) {
-        Axios.delete(`${URL}/api/user/destroy`, {headers: {'x-access-token': token}}).then((response) => {
+        Axios.delete(`${URL}/api/user/destroy`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
           expect(response.status).to.equal(200)
           done()
         })
