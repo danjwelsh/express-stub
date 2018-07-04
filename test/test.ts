@@ -19,8 +19,8 @@ describe('api', function() {
     } catch (e) { console.error(e) }
 	})
 
-  after(function () {
-    server.close()
+  after(async function () {
+    await server.close()
   })
 
 	// For the home routes.
@@ -29,7 +29,7 @@ describe('api', function() {
 		// Test the landing page renders
 		describe('Render', function () {
 			it("Should return the home page from '/'", function(done) {
-				Axios.get('http://127.0.0.1:8888/').then((response) => {
+				Axios.get(`${URL}/`).then((response) => {
           expect(response.status).to.equal(200)
           done()
         })
