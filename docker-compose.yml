@@ -3,7 +3,7 @@ services:
   web:
       build: .
       ports:
-      - 3000:3000
+      - 3000:80
       volumes:
       - "./web:/app/web"
       - "./app.ts:/app/app.ts"
@@ -14,12 +14,14 @@ services:
         - mongo
       links:
         - mongo
-      # environment:
-      #   MONGO_URI: mongodb://mongo/stub
+      environment:
+         MONGO_URI: ${MONGO_URI}
+         DEBUG: ${DEBUG}
+         SECRET: ${SECRET}
   mongo:
     image: mongo
     ports:
-      - "27018:27017"
+      - "27017:27017"
     volumes:
       - 'mongo:/data/db'
 volumes:
