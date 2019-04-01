@@ -1,4 +1,4 @@
-import { App } from "./web/server";
+import { App } from "./web/Server";
 
 // Set the port, default to 3000
 const port = process.env.PORT || 3000

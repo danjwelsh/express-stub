@@ -1,12 +1,17 @@
 import {expect} from 'chai'
 import {describe} from 'mocha'
-import {App} from "../web/server"
+import {App} from "../web/Server"
 import Axios, {AxiosError, AxiosResponse} from 'axios'
 import {Server} from 'http'
+import {IUser} from "../web/schemas/User";
+import {IResourceRepository} from "../web/repositories/IResourceRepository";
+import RepositoryFactory from "../web/repositories/RepositoryFactory";
 
 let server: Server
 const URL: string = 'http://localhost:8888'
 let token: string
+let user: IUser
+let userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
 
 describe('api', function () {
   // let server = null
@@ -22,6 +27,7 @@ describe('api', function () {
   })
 
   after(async function () {
+    await userRepository.destroy(user._id);
     await server.close()
   })
 
@@ -29,11 +35,9 @@ describe('api', function () {
   describe('Home', function () {
     // Test the landing page renders
     describe('Render', function () {
-      it("Should return the home page from '/'", function (done) {
-        Axios.get(`${URL}/`).then((response: AxiosResponse) => {
-          expect(response.status).to.equal(200)
-          done()
-        })
+      it("Should return the home page from '/'", async function () {
+        let response = await Axios.get(`${URL}/`);
+        expect(response.status).to.equal(200);
       })
     })
   })
@@ -47,6 +51,7 @@ describe('api', function () {
         }
         Axios.post(`${URL}/api/auth/register`, userData).then((response: AxiosResponse) => {
           expect(response.data.payload.token).to.have.length.above(10)
+          user = response.data.payload.user;
           done()
         })
       })
@@ -114,7 +119,7 @@ describe('api', function () {
     describe('Authentication', function () {
       describe('Require token', function () {
         it("Should reject request if no token is given", function (done) {
-          Axios.get(`${URL}/api/user/me`).then(() => {
+          Axios.get(`${URL}/api/user/${user._id}`).then(() => {
           }).catch((error) => {
             expect(error.response.status).to.equal(401)
             done()
@@ -125,7 +130,7 @@ describe('api', function () {
       describe('Check token is valid', function () {
         it("Should reject request if the token is invalid", function (done) {
           const invToken = `${token}0`
-          Axios.get(`${URL}/api/user/me`, {headers: {'x-access-token': invToken}}).then(() => {
+          Axios.get(`${URL}/api/user/${user._id}`, {headers: {'x-access-token': invToken}}).then(() => {
           }).catch((error: AxiosError) => {
             expect(error.response.status).to.equal(401)
             done()
@@ -138,8 +143,8 @@ describe('api', function () {
   describe('User', function () {
     describe('Profile', function () {
       it('Should return the users information', function (done) {
-        Axios.get(`${URL}/api/user/me`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
-          expect(response.data.payload.user.username).to.equal('tester')
+        Axios.get(`${URL}/api/user/${user._id}`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
+          expect(response.data.payload.username).to.equal('tester')
           done()
         })
       })
@@ -147,7 +152,7 @@ describe('api', function () {
 
     describe('Destroy', function () {
       it('Should delete users profile', function (done) {
-        Axios.delete(`${URL}/api/user/destroy`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
+        Axios.delete(`${URL}/api/user/${user._id}`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
           expect(response.status).to.equal(200)
           done()
         })

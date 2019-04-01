@@ -1,5 +1,5 @@
 import * as express from "express"
-import { Reply } from '../reply'
+import { Reply } from '../Reply'
 
 /**
  * Handle an error and give an appropriate response
