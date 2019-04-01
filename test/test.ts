@@ -1,162 +1,30 @@
-import {expect} from 'chai'
-import {describe} from 'mocha'
-import {App} from "../web/Server"
-import Axios, {AxiosError, AxiosResponse} from 'axios'
-import {Server} from 'http'
-import {IUser} from "../web/schemas/User";
-import {IResourceRepository} from "../web/repositories/IResourceRepository";
-import RepositoryFactory from "../web/repositories/RepositoryFactory";
+import { describe } from 'mocha';
+import { App } from '../web/Server';
+import { Server } from 'http';
 
-let server: Server
-const URL: string = 'http://localhost:8888'
-let token: string
-let user: IUser
-let userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+let server: Server;
 
-describe('api', function () {
-  // let server = null
-  before(function () {
-    const port: number = 8888
-    process.env.TEST = 'true'
+describe('api', () => {
+  before(() => {
+    const port: number = 8888;
+    process.env.TEST = 'true';
 
     try {
-      server = new App().express.listen(port)
+      server = new App().express.listen(port);
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
-  })
+  });
 
-  after(async function () {
-    await userRepository.destroy(user._id);
-    await server.close()
-  })
+  after(async () => {
+    await server.close();
+  });
 
-  // For the home routes.
-  describe('Home', function () {
-    // Test the landing page renders
-    describe('Render', function () {
-      it("Should return the home page from '/'", async function () {
-        let response = await Axios.get(`${URL}/`);
-        expect(response.status).to.equal(200);
-      })
-    })
-  })
-
-  describe('Auth', function () {
-    describe('Register', function () {
-      it("Should register a user and return a token", function (done) {
-        const userData = {
-          username: 'tester',
-          password: 'secret'
-        }
-        Axios.post(`${URL}/api/auth/register`, userData).then((response: AxiosResponse) => {
-          expect(response.data.payload.token).to.have.length.above(10)
-          user = response.data.payload.user;
-          done()
-        })
-      })
-    })
-
-    describe('Rejects creating existing account', function () {
-      it("Should prevent the user from creating an account with an existing username", function (done) {
-        const userData = {
-          username: 'tester',
-          password: 'secret'
-        }
-        Axios.post(`${URL}/api/auth/register`, userData).then(() => {
-        }).catch((error: AxiosError) => {
-          expect(error.response.status).to.equal(403)
-          done()
-        })
-      })
-    })
-
-    describe('Authenticate', function () {
-      it("Should return a JWT token", function (done) {
-        const userData = {
-          username: 'tester',
-          password: 'secret'
-        }
-        Axios.post(`${URL}/api/auth/authenticate`, userData).then((response: AxiosResponse) => {
-          expect(response.data.payload.token).to.have.length.above(10)
-          token = response.data.payload.token
-
-          done()
-        })
-      })
-    })
-
-    describe('Reject incorrect password', function () {
-      it("Should reject request if invalid password is given", function (done) {
-        const userData = {
-          username: 'tester',
-          password: 'password'
-        }
-        Axios.post(`${URL}/api/auth/authenticate`, userData).then(() => {
-        }).catch((error: AxiosError) => {
-          expect(error.response.status).to.equal(401)
-          done()
-        })
-      })
-    })
-
-    describe('Reject incorrect username', function () {
-      it("Should reject request if invalid username is given", function (done) {
-        const userData = {
-          username: 'tester1',
-          password: 'secret'
-        }
-        Axios.post(`${URL}/api/auth/authenticate`, userData).then(() => {
-        }).catch((error: AxiosError) => {
-          expect(error.response.status).to.equal(401)
-          done()
-        })
-      })
-    })
-  })
-
-  describe('Middleware', function () {
-    describe('Authentication', function () {
-      describe('Require token', function () {
-        it("Should reject request if no token is given", function (done) {
-          Axios.get(`${URL}/api/user/${user._id}`).then(() => {
-          }).catch((error) => {
-            expect(error.response.status).to.equal(401)
-            done()
-          })
-        })
-      })
-
-      describe('Check token is valid', function () {
-        it("Should reject request if the token is invalid", function (done) {
-          const invToken = `${token}0`
-          Axios.get(`${URL}/api/user/${user._id}`, {headers: {'x-access-token': invToken}}).then(() => {
-          }).catch((error: AxiosError) => {
-            expect(error.response.status).to.equal(401)
-            done()
-          })
-        })
-      })
-    })
-  })
-
-  describe('User', function () {
-    describe('Profile', function () {
-      it('Should return the users information', function (done) {
-        Axios.get(`${URL}/api/user/${user._id}`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
-          expect(response.data.payload.username).to.equal('tester')
-          done()
-        })
-      })
-    })
-
-    describe('Destroy', function () {
-      it('Should delete users profile', function (done) {
-        Axios.delete(`${URL}/api/user/${user._id}`, {headers: {'x-access-token': token}}).then((response: AxiosResponse) => {
-          expect(response.status).to.equal(200)
-          done()
-        })
-      })
-    })
-  })
-})
+  /**
+   * Import tests from files
+   */
+  require('./modules/Auth');
+  require('./modules/Middleware');
+  require('./modules/User');
+  require('./modules/Resource');
+});
