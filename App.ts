@@ -1,7 +1,6 @@
 import { App } from "./web/Server";
 
-// Set the port, default to 3000
-const port = process.env.PORT || 3000
+const port = 80
 const app = new App()
 
 // Start listening for requests
