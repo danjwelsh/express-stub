@@ -5,15 +5,15 @@ import { Server } from 'http';
 let server: Server;
 
 describe('api', () => {
-  before(() => {
+  const app = new App();
+
+  before(async () => {
     const port: number = 8888;
     process.env.TEST = 'true';
 
-    try {
-      server = new App().express.listen(port);
-    } catch (e) {
-      console.error(e);
-    }
+    await app.initialiseServer();
+    server = app.express.listen(port);
+    console.log('started server')
   });
 
   after(async () => {

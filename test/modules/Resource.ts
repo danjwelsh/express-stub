@@ -57,6 +57,6 @@ describe('Resource', () => {
   it('Should delete a resource', async () => {
     await userRepository.destroy(user._id);
     const stored = await userRepository.get(user._id);
-    expect(stored).to.be.null;
+    expect(stored).to.equal(null || undefined);
   });
 })

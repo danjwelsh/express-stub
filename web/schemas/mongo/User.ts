@@ -21,6 +21,7 @@ export interface User extends IBaseMongoResource, IUser {
 
   getId(): Schema.Types.ObjectId;
   getTable(): string;
+  toObject(): {};
 }
 
 export const userSchema = new Schema({

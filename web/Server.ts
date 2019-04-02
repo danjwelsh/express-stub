@@ -18,23 +18,6 @@ export class App {
 
   constructor() {
     this.express = express();
-
-    this.connectToDB()
-      .then(() => {
-        // Descriptions of each in method declaration.
-        this.prepareStatic();
-        this.setViewEngine();
-        this.setBodyParser();
-        this.addCors();
-        this.setAppSecret();
-        this.addRoutes(this.express);
-        this.setErrorHandler();
-      })
-      .catch((error) => {
-        console.error(error);
-        console.error('Could not connect to database');
-        process.exit(1);
-      });
   }
 
   /**
@@ -95,5 +78,25 @@ export class App {
 
   private async connectToDB(): Promise<void> {
     await DatabaseFactory.getConnection();
+  }
+
+  public async initialiseServer(): Promise<void> {
+    try {
+      await this.connectToDB();
+    } catch (e) {
+      console.error(e);
+      console.error('Could not connect to database');
+      process.exit(1);
+    }
+
+    console.log('connected to database')
+    // Descriptions of each in method declaration.
+    this.prepareStatic();
+    this.setViewEngine();
+    this.setBodyParser();
+    this.addCors();
+    this.setAppSecret();
+    this.addRoutes(this.express);
+    this.setErrorHandler();
   }
 }

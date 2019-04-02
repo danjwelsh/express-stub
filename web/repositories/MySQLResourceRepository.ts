@@ -1,6 +1,7 @@
 import {getManager, ObjectType} from 'typeorm';
 import {IResourceRepository} from "./IResourceRepository";
 import IBaseMySQLResource from "../schemas/mysql/IBaseMySQLResource";
+import {UserRole} from "../UserRole";
 
 /**
  * Generic controller for resource of type T, must extend typeorm.BaseEntity.
@@ -51,18 +52,13 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
    */
   async edit(id: number, data: any): Promise<T> {
     let entity: T = await this.get(id);
-    const objEntity: any = {
-      id: entity.getId(),
-    };
+    const entObj: any = entity.toObject();
 
     Object.keys(data).forEach((key: string) => {
-      objEntity[key] = data[key];
+      entObj[key] = data[key];
     });
 
-    entity = objEntity as T;
-    entity = await entity.save();
-
-    return entity;
+    return await getManager().getRepository(this.type).save(entObj)
   }
 
   async findManyWithFilter(filter: {}, options?: { limit: number; skip: number }): Promise<T[]> {
@@ -129,8 +125,14 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
   }
 
   async store(data: any): Promise<T> {
-    let entity: T = data as T;
-    entity = await entity.save();
+    let entity: T;
+    data.role = UserRole.USER;
+
+    try {
+      entity = await getManager().getRepository(this.type).save(data);
+    } catch (e) {
+      throw e;
+    }
     return entity;
   }
 }

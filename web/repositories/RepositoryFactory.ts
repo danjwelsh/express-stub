@@ -35,7 +35,6 @@ export default class RepositoryFactory {
    */
   private static getMongoRepository(res: string): MongoResourceRepository<IBaseMongoResource> {
     let repository: MongoResourceRepository<IBaseMongoResource>;
-
     switch (res) {
       case 'user':
         repository = new MongoResourceRepository<MongoUser>();
@@ -56,7 +55,6 @@ export default class RepositoryFactory {
    */
   private static getMySQLRepository(res: string): MySQLResourceRepository<IBaseMySQLResource> {
     let repository: MySQLResourceRepository<IBaseMySQLResource>;
-
     switch (res) {
       case 'user':
         repository = new MySQLResourceRepository<MySQLUser>(MySQLUser);

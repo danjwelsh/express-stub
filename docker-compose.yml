@@ -18,6 +18,7 @@ services:
          MONGO_URI: ${MONGO_URI}
          DEBUG: ${DEBUG}
          SECRET: ${SECRET}
+         DB_TYPE: ${DB_TYPE}
   mongo:
     image: mongo
     ports:
@@ -30,10 +31,11 @@ services:
       - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: stub
     volumes:
-      - mysql_db:/var/lib/mysql
+      - mysql_database:/var/lib/mysql
     restart: always
 
 volumes:
   mongo:
-  mysql_db:
+  mysql_database:

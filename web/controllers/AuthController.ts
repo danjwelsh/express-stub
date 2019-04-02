@@ -1,11 +1,10 @@
-import { User } from '../schemas/mongo/User';
 import * as jwt from 'jsonwebtoken';
-import models from '../Models';
 import { IResourceRepository } from '../repositories/IResourceRepository';
 import RepositoryFactory from '../repositories/RepositoryFactory';
 import CryptoHelper from '../CryptoHelper';
+import {IUser} from "../schemas/IUser";
 
-const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
+const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
 
 export default class AuthController {
   /**
@@ -14,10 +13,10 @@ export default class AuthController {
    * @param  password password
    * @return {User} Matched user
    */
-  async authenticateUser(username: string, password: string): Promise<User> {
-    let user: User;
+  async authenticateUser(username: string, password: string): Promise<IUser> {
+    let user: IUser;
     try {
-      user = await models.User.findOne({ username });
+      user = await userRepository.findOneWithFilter({ username });
     } catch (error) {
       throw error;
     }
@@ -41,7 +40,7 @@ export default class AuthController {
    * @param  user User
    * @return
    */
-  generateToken(user: User): string {
+  generateToken(user: IUser): string {
     const payload = {
       id: user._id,
       username: user.username,

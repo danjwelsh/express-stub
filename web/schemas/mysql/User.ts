@@ -40,4 +40,14 @@ export class User extends BaseEntity implements IBaseMySQLResource, IUser {
   setLinkedCollection(collection: number[], collectionName: string): Promise<void> {
     return undefined;
   }
+
+  toObject(): {} {
+    return {
+      _id: this._id,
+      username: this.username,
+      password: this.password,
+      iv: this.iv,
+      role: this.role,
+    }
+  }
 }

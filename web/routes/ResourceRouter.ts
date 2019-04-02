@@ -6,10 +6,10 @@ import { BaseRouter } from './BaseRouter';
 import { getSchema } from './index';
 import IResourceRouter from './IResourceRouter';
 import RouterSchema from './RouterSchema';
-import { User } from '../schemas/mongo/User';
 import { Schema } from 'mongoose';
 import BaseResourceRouter from "./BaseResourceRouter";
 import IBaseResource from "../schemas/IBaseResource";
+import {IUser} from "../schemas/IUser";
 
 export default class ResourceRouter<T extends IBaseResource>
   extends BaseResourceRouter
@@ -56,9 +56,9 @@ export default class ResourceRouter<T extends IBaseResource>
     const id: string = req.params.id;
     const routeSchema: RouterSchema = getSchema(req.originalUrl);
     const cont: IResourceRepository<T> = RepositoryFactory.getRepository(routeSchema.table);
-    const userRepo: IResourceRepository<User> = RepositoryFactory.getRepository('user');
+    const userRepo: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
     const err: Error = BaseRouter.errorCheck(res);
-    let user: User;
+    let user: IUser;
 
     if (err) { return next(err); }
 
@@ -67,8 +67,8 @@ export default class ResourceRouter<T extends IBaseResource>
       if (routeSchema.options.isOwned) {
         // remove from user.
         user = await userRepo.get(res.locals.user.id);
-        const resourceList: Schema.Types.ObjectId[] | string | number = await user.getLinkedCollection(routeSchema.table);
-        const idx: number = resourceList.findIndex(resource => resource.toString() === id);
+        let resourceList: (Schema.Types.ObjectId | number)[] = await user.getLinkedCollection(routeSchema.table);
+        const idx: number = resourceList.findIndex(resource => `${resource}` === id);
         resourceList.splice(idx, 1);
         await user.setLinkedCollection(resourceList, routeSchema.table);
         await user.save();

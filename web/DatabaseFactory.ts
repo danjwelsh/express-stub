@@ -43,11 +43,11 @@ export class DatabaseFactory {
   private static async getMySQLConnection(): Promise<void> {
     await createConnection({
       type: "mysql",
-      host: "localhost",
+      host: "mysql",
       port: 3306,
       username: "root",
-      password: "admin",
-      database: "test",
+      password: "secret",
+      database: "stub",
       entities: [
         User
       ],
