@@ -12,6 +12,7 @@ export class DatabaseFactory {
    * @returns {Promise<void>}
    */
   static async getConnection(): Promise<void> {
+    console.log('#getConnection', process.env.DB_TYPE)
     switch (process.env.DB_TYPE) {
       case DBType.Mongo:
         await this.getMongoConnection();

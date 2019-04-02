@@ -18,7 +18,7 @@ services:
          MONGO_URI: ${MONGO_URI}
          DEBUG: ${DEBUG}
          SECRET: ${SECRET}
-         DB_TYPE: ${DB_TYPE}
+#         DB_TYPE: ${DB_TYPE}
   mongo:
     image: mongo
     ports:

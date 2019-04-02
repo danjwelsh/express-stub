@@ -71,7 +71,7 @@ export default class ResourceRouter<T extends IBaseResource>
         const idx: number = resourceList.findIndex(resource => `${resource}` === id);
         resourceList.splice(idx, 1);
         await user.setLinkedCollection(resourceList, routeSchema.table);
-        await user.save();
+        await userRepo.edit(user.getId(), user.toJSONObject());
       }
     } catch (e) {
       return next(e);

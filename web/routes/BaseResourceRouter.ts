@@ -19,10 +19,10 @@ export default abstract class BaseResourceRouter extends BaseRouter {
   public insertMiddleware(options: {isProtected: boolean, isOwned: boolean}): void {
     if (options != null && options.isProtected) {
       this.addMiddleware(checkToken);
-      this.addMiddleware(userPermission);
+      this.addMiddleware(userPermission(this.context));
     }
 
-    this.addMiddleware(checkAdmin);
+    this.addMiddleware(checkAdmin(this.context));
     this.addDefaultRoutes();
   }
 

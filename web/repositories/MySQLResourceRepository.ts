@@ -52,7 +52,7 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
    */
   async edit(id: number, data: any): Promise<T> {
     let entity: T = await this.get(id);
-    const entObj: any = entity.toObject();
+    const entObj: any = entity.toJSONObject();
 
     Object.keys(data).forEach((key: string) => {
       entObj[key] = data[key];

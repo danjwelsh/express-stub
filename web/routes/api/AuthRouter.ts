@@ -8,8 +8,6 @@ import { IResourceRepository } from '../../repositories/IResourceRepository';
 import RepositoryFactory from '../../repositories/RepositoryFactory';
 import {IUser} from "../../schemas/IUser";
 
-const authController: AuthController = new AuthController();
-
 export class AuthRouter extends BaseRouter {
   /**
    * Add routes to the Auth Router.
@@ -48,6 +46,7 @@ export class AuthRouter extends BaseRouter {
    */
   async authenticateUser(req: Request, res: Response, next: NextFunction):
     Promise<Response | void> {
+    const authController: AuthController = new AuthController();
     // Get username and password from request
     const username: string = req.body.username;
     const password: string = req.body.password;
@@ -103,6 +102,7 @@ export class AuthRouter extends BaseRouter {
    * @returns {Promise<e.Response | void>}
    */
   async registerUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    const authController: AuthController = new AuthController();
     // Get username and password
     const username: string = req.body.username;
     const password: string = req.body.password;

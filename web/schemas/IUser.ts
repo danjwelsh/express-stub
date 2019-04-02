@@ -15,6 +15,5 @@ export interface IUser {
   getLinkedCollection(collectionName: string): Promise<Schema.Types.ObjectId[] | number[]>;
   setLinkedCollection(collection: (Schema.Types.ObjectId | number )[], collectionName: string): Promise<void>;
 
-  save(): Promise<this>;
-  toObject(): {};
+  toJSONObject(): {};
 }

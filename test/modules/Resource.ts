@@ -7,7 +7,7 @@ import {IUser} from "../../web/schemas/IUser";
 import * as assert from "assert";
 
 describe('Resource', () => {
-  const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+  const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository( 'user');
   let user: IUser;
 
   after(async () => {

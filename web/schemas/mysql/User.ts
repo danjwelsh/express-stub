@@ -41,7 +41,7 @@ export class User extends BaseEntity implements IBaseMySQLResource, IUser {
     return undefined;
   }
 
-  toObject(): {} {
+  toJSONObject(): {} {
     return {
       _id: this._id,
       username: this.username,

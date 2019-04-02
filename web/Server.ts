@@ -3,9 +3,10 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as handler from './middleware/Handler';
-import { addRoutes } from './routes';
+import {addRoutes} from './routes';
 import * as dotenv from 'dotenv';
 import {DatabaseFactory} from "./DatabaseFactory";
+
 dotenv.load();
 
 /**
