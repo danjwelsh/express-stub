@@ -37,9 +37,9 @@ export class DatabaseFactory {
       return await mongoose.connect(process.env.MONGO_URI_LOCAL);
     } else {
       return await mongoose.connect(process.env.MONGO_URI, {
-        user: process.env.MONGODB_USER,
-        pass: process.env.MONGODB_PASS,
-        dbName: process.env.MONGODB_DATABASE,
+        user: process.env.DB_USERNAME,
+        pass: process.env.DB_PASSWORD,
+        dbName: process.env.DB_DATABASE,
         authdb: 'admin',
       });
     }
@@ -52,11 +52,11 @@ export class DatabaseFactory {
   public static async getMySQLConnection(): Promise<Connection> {
     return await createConnection({
       type: "mysql",
-      host: "mysql",
-      port: 3306,
-      username: "root",
-      password: "secret",
-      database: "stub",
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT, 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       entities: [
         User
       ],
