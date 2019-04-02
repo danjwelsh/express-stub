@@ -1,10 +1,11 @@
+import 'reflect-metadata';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as handler from './middleware/Handler';
-import * as mongoose from 'mongoose';
 import { addRoutes } from './routes';
 import * as dotenv from 'dotenv';
+import {DatabaseFactory} from "./DatabaseFactory";
 dotenv.load();
 
 /**
@@ -18,28 +19,22 @@ export class App {
   constructor() {
     this.express = express();
 
-    /**
-     * Skip auth if in development.
-     */
-    if (process.env.LOCAL === 'true') {
-      mongoose.connect(process.env.MONGO_URI_LOCAL);
-    } else {
-      mongoose.connect(process.env.MONGO_URI, {
-        user: process.env.MONGODB_USER,
-        pass: process.env.MONGODB_PASS,
-        dbName: process.env.MONGODB_DATABASE,
-        authdb: 'admin',
+    this.connectToDB()
+      .then(() => {
+        // Descriptions of each in method declaration.
+        this.prepareStatic();
+        this.setViewEngine();
+        this.setBodyParser();
+        this.addCors();
+        this.setAppSecret();
+        this.addRoutes(this.express);
+        this.setErrorHandler();
+      })
+      .catch((error) => {
+        console.error(error);
+        console.error('Could not connect to database');
+        process.exit(1);
       });
-    }
-
-    // Descriptions of each in method declaration.
-    this.prepareStatic();
-    this.setViewEngine();
-    this.setBodyParser();
-    this.addCors();
-    this.setAppSecret();
-    this.addRoutes(this.express);
-    this.setErrorHandler();
   }
 
   /**
@@ -96,5 +91,9 @@ export class App {
    */
   private setErrorHandler(): void {
     this.express.use(handler.handleResponse);
+  }
+
+  private async connectToDB(): Promise<void> {
+    await DatabaseFactory.getConnection();
   }
 }

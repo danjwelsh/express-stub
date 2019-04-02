@@ -1,22 +1,22 @@
-import { Schema } from 'mongoose';
-import IBaseMongoResource from './IBaseMongoResource';
-import { UserRole } from '../UserRole';
+import { Schema} from 'mongoose';
+import { UserRole } from '../../UserRole';
+import IBaseMongoResource from "./IBaseMongoResource";
+import {IUser} from "../IUser";
+import {getModel} from "../../Models";
 
 const schemaOptions = {
   timestamps: true,
 };
 
-export interface IUser extends IBaseMongoResource {
+export interface User extends IBaseMongoResource, IUser {
   username: string;
   password: string;
   iv: string;
-  devices: Schema.Types.ObjectId[];
-  media: Schema.Types.ObjectId[];
   role: UserRole;
   createdAt: string;
   updatedAt: string;
 
-  getLinkedCollection(collectionName: string): Schema.Types.ObjectId[];
+  getLinkedCollection(collectionName: string): Promise<Schema.Types.ObjectId[]>;
   setLinkedCollection(collection: Schema.Types.ObjectId[], collectionName: string): Promise<void>;
 
   getId(): Schema.Types.ObjectId;
@@ -49,26 +49,15 @@ export const userSchema = new Schema({
 },                                   schemaOptions);
 
 userSchema.methods.getLinkedCollection =
-  function (collectionName: string): Schema.Types.ObjectId[] {
-    switch (collectionName) {
-      case 'devices':
-        return this.devices;
-      case 'media':
-        return this.media;
-      default:
-        return [];
-    }
+  async function (collectionName: string): Promise<Schema.Types.ObjectId[]> {
+    const results = await getModel(collectionName).find({userId: this.getId()})
+    return results.map(result => result.getId() as Schema.Types.ObjectId);
   };
 
 userSchema.methods.setLinkedCollection =
   async function (collection: Schema.Types.ObjectId, collectionName: string): Promise<void> {
     switch (collectionName) {
-      case 'devices':
-        this.devices = collection;
-        break;
-      case 'media':
-        this.media = collection;
-        break;
+      // set collections here
       default:
         break;
     }

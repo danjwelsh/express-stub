@@ -3,14 +3,14 @@ import axios, { AxiosResponse } from 'axios';
 import { URL } from '../Commons';
 import { expect } from 'chai';
 import AuthController from '../../web/controllers/AuthController';
-import { IUser } from '../../web/schemas/User';
+import { User } from '../../web/schemas/mongo/User';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
 
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
 const authController: AuthController = new AuthController();
 
-let user: IUser;
+let user: User;
 let token: string;
 
 describe('User', () => {

@@ -1,21 +1,21 @@
-import { IUser } from '../schemas/User';
+import { User } from '../schemas/mongo/User';
 import * as jwt from 'jsonwebtoken';
 import models from '../Models';
 import { IResourceRepository } from '../repositories/IResourceRepository';
 import RepositoryFactory from '../repositories/RepositoryFactory';
 import CryptoHelper from '../CryptoHelper';
 
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
 
 export default class AuthController {
   /**
    * Authenticate a user
    * @param  username username
    * @param  password password
-   * @return {IUser} Matched user
+   * @return {User} Matched user
    */
-  async authenticateUser(username: string, password: string): Promise<IUser> {
-    let user: IUser;
+  async authenticateUser(username: string, password: string): Promise<User> {
+    let user: User;
     try {
       user = await models.User.findOne({ username });
     } catch (error) {
@@ -38,10 +38,10 @@ export default class AuthController {
 
   /**
    * Create a JWT token for the user
-   * @param  user IUser
+   * @param  user User
    * @return
    */
-  generateToken(user: IUser): string {
+  generateToken(user: User): string {
     const payload = {
       id: user._id,
       username: user.username,

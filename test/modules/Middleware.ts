@@ -2,16 +2,16 @@ import { describe } from 'mocha';
 import axios, { AxiosError } from 'axios';
 import { URL } from '../Commons';
 import { expect } from 'chai';
-import { IUser } from '../../web/schemas/User';
+import { User } from '../../web/schemas/mongo/User';
 import AuthController from '../../web/controllers/AuthController';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
 import CryptoHelper from '../../web/CryptoHelper';
 
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
 const authController: AuthController = new AuthController();
 
-let user: IUser;
+let user: User;
 let token: string;
 
 describe('Middleware', () => {

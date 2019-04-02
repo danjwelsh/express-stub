@@ -22,7 +22,18 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+
+  mysql:
+    image: mysql:5.7
+    command: --explicit_defaults_for_timestamp
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
     volumes:
-      - 'mongo:/data/db'
+      - mysql_db:/var/lib/mysql
+    restart: always
+
 volumes:
   mongo:
+  mysql_db:

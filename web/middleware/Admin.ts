@@ -1,6 +1,6 @@
 import ControllerFactory from '../repositories/RepositoryFactory';
 import { IResourceRepository } from '../repositories/IResourceRepository';
-import { IUser } from '../schemas/User';
+import { IUser } from '../schemas/IUser';
 import { UserRole } from '../UserRole';
 import { NextFunction, Request, Response } from 'express';
 
@@ -14,14 +14,14 @@ export async function checkAdmin(req: Request,
                                  res: Response,
                                  next: NextFunction) {
 
-  const userController: IResourceRepository<IUser> = ControllerFactory.getRepository('user');
+  const userRepository: IResourceRepository<IUser> = ControllerFactory.getRepository('user');
   let user: IUser;
   if (res.locals.error) {
     if (!(res.locals.error === 403)) return next();
   }
 
   try {
-    user = await userController.get(res.locals.user.id);
+    user = await userRepository.get(res.locals.user.id);
   } catch (e) {
     res.locals.customErrorMessage = e.message;
     res.locals.error = 500;

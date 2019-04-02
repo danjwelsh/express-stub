@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Reply } from '../../Reply';
-import { IUser } from '../../schemas/User';
+import { User } from '../../schemas/mongo/User';
 import AuthController from '../../controllers/AuthController';
 import { BaseRouter } from '../BaseRouter';
 import { HttpMethods as Methods } from '../../HttpMethods';
@@ -8,7 +8,7 @@ import CryptoHelper from '../../CryptoHelper';
 import { IResourceRepository } from '../../repositories/IResourceRepository';
 import RepositoryFactory from '../../repositories/RepositoryFactory';
 
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
 const authController: AuthController = new AuthController();
 
 export class AuthRouter extends BaseRouter {
@@ -53,7 +53,7 @@ export class AuthRouter extends BaseRouter {
     const username: string = req.body.username;
     const password: string = req.body.password;
 
-    let user: IUser;
+    let user: User;
     try {
       user = await authController.authenticateUser(username, password);
     } catch (error) {
@@ -107,7 +107,7 @@ export class AuthRouter extends BaseRouter {
     // Get username and password
     const username: string = req.body.username;
     const password: string = req.body.password;
-    let user: IUser;
+    let user: User;
 
     // abort if either username or password are null
     if (!username || !password) {

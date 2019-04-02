@@ -2,12 +2,12 @@ import { describe } from 'mocha';
 import axios, { AxiosResponse } from 'axios';
 import { URL } from '../Commons';
 import { expect } from 'chai';
-import { IUser } from '../../web/schemas/User';
+import { User } from '../../web/schemas/mongo/User';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
 
-let user: IUser;
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+let user: User;
+const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
 
 describe('Auth', () => {
   after(async () => {

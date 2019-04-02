@@ -1,10 +1,10 @@
 import { Model, model } from 'mongoose';
-import { IUser, userSchema } from './schemas/User';
-import IBaseMongoResource from './schemas/IBaseMongoResource';
+import { User, userSchema } from './schemas/mongo/User';
+import IBaseMongoResource from './schemas/mongo/IBaseMongoResource';
 
 // Export Models
 export default {
-  User: model<IUser>(
+  User: model<User>(
     'User', userSchema,
   ),
 };
@@ -12,7 +12,7 @@ export default {
 export function getModel(t: string): Model<IBaseMongoResource> {
   switch (t) {
     case 'user':
-      return model<IUser>(
+      return model<User>(
         'User', userSchema,
       );
     default:

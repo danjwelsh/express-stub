@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
-import IBaseMongoResource from '../schemas/IBaseMongoResource';
+import IBaseResource from "../schemas/IBaseResource";
 
-export default interface IResourceRouter<T extends IBaseMongoResource> {
+export default interface IResourceRouter<T extends IBaseResource> {
   store(req: Request, res: Response, next: NextFunction): Promise<void | Response> | void;
   index(req: Request, res: Response, next: NextFunction): Promise<void | Response> | void;
   show(req: Request, res: Response, next: NextFunction): Promise<void | Response> | void;
