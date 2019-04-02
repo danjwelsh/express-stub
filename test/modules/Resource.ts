@@ -1,13 +1,14 @@
 import {describe} from "mocha";
 import {expect} from "chai";
-import {User} from "../../web/schemas/mongo/User";
 import {IResourceRepository} from "../../web/repositories/IResourceRepository";
 import RepositoryFactory from "../../web/repositories/RepositoryFactory";
 import CryptoHelper from "../../web/CryptoHelper";
+import {IUser} from "../../web/schemas/IUser";
+import * as assert from "assert";
 
 describe('Resource', () => {
-  const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
-  let user: User;
+  const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+  let user: IUser;
 
   after(async () => {
     await userRepository.destroy(user._id);
@@ -24,7 +25,7 @@ describe('Resource', () => {
   });
 
   it('Should get a resource', async () => {
-    const storedUser: User = await userRepository.get(user._id);
+    const storedUser: IUser = await userRepository.get(user._id);
     expect(storedUser._id.toString()).to.equal(user._id.toString());
   });
 
@@ -44,19 +45,19 @@ describe('Resource', () => {
   });
 
   it('Should find resources matching a query', async () => {
-    const users: User[] = await userRepository.findManyWithFilter({username: user.username});
+    const users: IUser[] = await userRepository.findManyWithFilter({username: user.username});
     expect(users.length).to.equal(1);
     expect(users[0].username).to.equal(user.username);
   });
 
   it('Should find a resource matching a query', async () => {
-    const result: User = await userRepository.findOneWithFilter({username: user.username});
+    const result: IUser = await userRepository.findOneWithFilter({username: user.username});
     expect(result.username).to.equal(user.username);
   });
 
   it('Should delete a resource', async () => {
     await userRepository.destroy(user._id);
     const stored = await userRepository.get(user._id);
-    expect(stored).to.equal(null || undefined);
+    assert(stored === null || stored === undefined);
   });
 })

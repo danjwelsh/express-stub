@@ -89,7 +89,6 @@ export class App {
       process.exit(1);
     }
 
-    console.log('connected to database')
     // Descriptions of each in method declaration.
     this.prepareStatic();
     this.setViewEngine();

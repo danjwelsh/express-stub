@@ -6,6 +6,7 @@ import {MySQLResourceRepository} from "./MySQLResourceRepository";
 import IBaseMySQLResource from "../schemas/mysql/IBaseMySQLResource";
 import {User as MySQLUser} from "../schemas/mysql/User";
 import {BaseEntity} from "typeorm";
+import {DBType} from "../DBType";
 
 /**
  * Generate a controller for the type of database
@@ -19,9 +20,9 @@ export default class RepositoryFactory {
    */
   public static getRepository(resName: string): IResourceRepository<IBaseMongoResource | any> {
     switch (process.env.DB_TYPE) {
-      case 'MONGO':
+      case DBType.Mongo:
         return RepositoryFactory.getMongoRepository(resName);
-      case 'MYSQL':
+      case DBType.MySQL:
         return RepositoryFactory.getMySQLRepository(resName);
       default:
         return RepositoryFactory.getMongoRepository(resName);

@@ -107,7 +107,6 @@ export class AuthRouter extends BaseRouter {
     const username: string = req.body.username;
     const password: string = req.body.password;
     const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
-
     let user: IUser;
 
     // abort if either username or password are null
@@ -122,6 +121,7 @@ export class AuthRouter extends BaseRouter {
     try {
       user = await userRepository.store({ username, password: hash, iv });
     } catch (error) {
+      console.log(error);
       if (error.message.indexOf('duplicate key error') > -1) {
         return next(new Error('403'));
       }

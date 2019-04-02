@@ -1,17 +1,17 @@
 import { describe } from 'mocha';
-import axios, { AxiosError } from 'axios';
-import { URL } from '../Commons';
+import axios from 'axios';
+import {getUrl} from '../Commons';
 import { expect } from 'chai';
-import { User } from '../../web/schemas/mongo/User';
 import AuthController from '../../web/controllers/AuthController';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
 import CryptoHelper from '../../web/CryptoHelper';
+import {IUser} from "../../web/schemas/IUser";
 
-const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
+const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
 const authController: AuthController = new AuthController();
 
-let user: User;
+let user: IUser;
 let token: string;
 
 describe('Middleware', () => {
@@ -31,7 +31,7 @@ describe('Middleware', () => {
     describe('Require token', () => {
       it('Should reject request if no token is given', async () => {
         try {
-          await axios.get(`${URL}/api/user/${user._id}`);
+          await axios.get(`${getUrl()}/api/user/${user._id}`);
         } catch (error) {
           expect(error.response.status).to.equal(401);
         }
@@ -40,7 +40,7 @@ describe('Middleware', () => {
       it('Should reject request if the token is invalid', async () => {
         const invToken = `${token}0`;
         try {
-          await axios.get(`${URL}/api/user/${user._id}`, { headers: { 'x-access-token': invToken } });
+          await axios.get(`${getUrl()}/api/user/${user._id}`, { headers: { 'x-access-token': invToken } });
         } catch (error) {
           expect(error.response.status).to.equal(401);
         }

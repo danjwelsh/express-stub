@@ -1,13 +1,13 @@
 import { describe } from 'mocha';
 import axios, { AxiosResponse } from 'axios';
-import { URL } from '../Commons';
+import {getUrl} from '../Commons';
 import { expect } from 'chai';
-import { User } from '../../web/schemas/mongo/User';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
+import {IUser} from "../../web/schemas/IUser";
 
-let user: User;
-const userRepository: IResourceRepository<User> = RepositoryFactory.getRepository('user');
+let user: IUser;
+const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
 
 describe('Auth', () => {
   after(async () => {
@@ -20,7 +20,7 @@ describe('Auth', () => {
         username: 'tester-auth',
         password: 'secret',
       };
-      const response: AxiosResponse = await axios.post(`${URL}/api/auth/register`, userData);
+      const response: AxiosResponse = await axios.post(`${getUrl()}/api/auth/register`, userData);
       expect(response.data.payload.token).to.have.length.above(10);
       user = response.data.payload.user;
     });
@@ -32,7 +32,7 @@ describe('Auth', () => {
       };
 
       try {
-        await axios.post(`${URL}/api/auth/register`, userData)
+        await axios.post(`${getUrl()}/api/auth/register`, userData)
       } catch (error) {
         expect(error.response.status).to.equal(403);
       }
@@ -46,7 +46,7 @@ describe('Auth', () => {
         password: 'secret',
       };
 
-      const response: AxiosResponse = await axios.post(`${URL}/api/auth/authenticate`, userData);
+      const response: AxiosResponse = await axios.post(`${getUrl()}/api/auth/authenticate`, userData);
       expect(response.data.payload.token).to.have.length.above(10);
     });
 
@@ -57,7 +57,7 @@ describe('Auth', () => {
       };
 
       try {
-        await axios.post(`${URL}/api/auth/authenticate`, userData)
+        await axios.post(`${getUrl()}/api/auth/authenticate`, userData)
       } catch (error) {
         expect(error.response.status).to.equal(401);
       }
@@ -70,7 +70,7 @@ describe('Auth', () => {
       };
 
       try {
-        await axios.post(`${URL}/api/auth/authenticate`, userData);
+        await axios.post(`${getUrl()}/api/auth/authenticate`, userData);
       } catch (error) {
         expect(error.response.status).to.equal(401);
       }

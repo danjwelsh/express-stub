@@ -4,8 +4,6 @@ import RepositoryFactory from '../repositories/RepositoryFactory';
 import CryptoHelper from '../CryptoHelper';
 import {IUser} from "../schemas/IUser";
 
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
-
 export default class AuthController {
   /**
    * Authenticate a user
@@ -14,6 +12,7 @@ export default class AuthController {
    * @return {User} Matched user
    */
   async authenticateUser(username: string, password: string): Promise<IUser> {
+    const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
     let user: IUser;
     try {
       user = await userRepository.findOneWithFilter({ username });

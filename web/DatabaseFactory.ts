@@ -1,14 +1,22 @@
 import * as mongoose from "mongoose";
 import {createConnection} from "typeorm";
 import {User} from "./schemas/mysql/User";
+import {DBType} from "./DBType";
 
+/**
+ * Factory for generating database connections.
+ */
 export class DatabaseFactory {
+  /**
+   * Get a connection depending on DB_TYPE
+   * @returns {Promise<void>}
+   */
   static async getConnection(): Promise<void> {
     switch (process.env.DB_TYPE) {
-      case 'MONGO':
+      case DBType.Mongo:
         await this.getMongoConnection();
         break;
-      case 'MYSQL':
+      case DBType.MySQL:
         await this.getMySQLConnection();
         break;
       default:
