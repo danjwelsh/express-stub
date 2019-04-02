@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import { Schema } from "mongoose";
 import IBaseResource from "../schemas/IBaseResource";
 
 /**
@@ -13,10 +13,13 @@ export interface IResourceRepository<T extends IBaseResource> {
   destroy(id: Schema.Types.ObjectId | string | number): Promise<void>;
 
   findOneWithFilter(filter: {}): Promise<T>;
-  findManyWithFilter(filter: {}, options?: {
-    limit: number,
-    skip: number,
-  }): Promise<T[]>;
+  findManyWithFilter(
+    filter: {},
+    options?: {
+      limit: number;
+      skip: number;
+    }
+  ): Promise<T[]>;
 
   getCount(filter: {}): Promise<number>;
 

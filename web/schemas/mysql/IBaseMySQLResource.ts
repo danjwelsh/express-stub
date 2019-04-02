@@ -1,4 +1,4 @@
+import { BaseEntity } from "typeorm";
 import IBaseResource from "../IBaseResource";
-import {BaseEntity} from "typeorm";
 
 export default interface IBaseMySQLResource extends IBaseResource, BaseEntity {}

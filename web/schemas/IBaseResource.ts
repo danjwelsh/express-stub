@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import { Schema } from "mongoose";
 
 export default interface IBaseResource {
   getId(): string | number | Schema.Types.ObjectId;

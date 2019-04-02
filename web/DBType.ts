@@ -1,4 +1,4 @@
 export enum DBType {
-  Mongo = 'MONGO',
-  MySQL = 'MYSQL',
+  Mongo = "MONGO",
+  MySQL = "MYSQL"
 }

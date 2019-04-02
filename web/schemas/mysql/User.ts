@@ -1,53 +1,65 @@
-import {BaseEntity, Column, Entity, getRepository, PrimaryGeneratedColumn} from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  getRepository,
+  PrimaryGeneratedColumn
+} from "typeorm";
+import { UserRole } from "../../UserRole";
+import { IUser } from "../IUser";
 import IBaseMySQLResource from "./IBaseMySQLResource";
-import {UserRole} from "../../UserRole";
-import {IUser} from "../IUser";
 
 @Entity()
 export class User extends BaseEntity implements IBaseMySQLResource, IUser {
   @PrimaryGeneratedColumn()
-  _id: number;
+  // tslint:disable-next-line:variable-name
+  public _id: number;
 
   @Column()
-  username: string;
+  public username: string;
 
   @Column()
-  password: string;
+  public password: string;
 
   @Column()
-  iv: string;
+  public iv: string;
 
-  @Column('varchar')
-  role: UserRole;
+  @Column("varchar")
+  public role: UserRole;
 
-  getId(): number {
+  public getId(): number {
     return this._id;
   }
 
-  getTable(): string {
-    return 'user';
+  public getTable(): string {
+    return "user";
   }
 
-  getUserId(): number {
+  public getUserId(): number {
     return 0;
   }
 
-  async getLinkedCollection(collectionName: string): Promise<number[]> {
-    const results: IBaseMySQLResource[] = await getRepository(collectionName).find({userId : this._id}) as IBaseMySQLResource[];
+  public async getLinkedCollection(collectionName: string): Promise<number[]> {
+    const results: IBaseMySQLResource[] = (await getRepository(
+      collectionName
+    ).find({ userId: this._id })) as IBaseMySQLResource[];
     return results.map(res => res.getId() as number);
   }
 
-  setLinkedCollection(collection: number[], collectionName: string): Promise<void> {
+  public setLinkedCollection(
+    collection: number[],
+    collectionName: string
+  ): Promise<void> {
     return undefined;
   }
 
-  toJSONObject(): {} {
+  public toJSONObject(): {} {
     return {
       _id: this._id,
-      username: this.username,
-      password: this.password,
       iv: this.iv,
+      password: this.password,
       role: this.role,
-    }
+      username: this.username
+    };
   }
 }

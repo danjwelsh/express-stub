@@ -1,8 +1,8 @@
-import {NextFunction, Response, Request} from 'express';
-import RouterSchema from '../routes/RouterSchema';
-import {getSchema} from '../routes/index';
-import ControllerFactory from '../repositories/RepositoryFactory';
-import {IResourceRepository} from '../repositories/IResourceRepository';
+import { NextFunction, Request, Response } from "express";
+import { IResourceRepository } from "../repositories/IResourceRepository";
+import ControllerFactory from "../repositories/RepositoryFactory";
+import { getSchema } from "../routes/index";
+import RouterSchema from "../routes/RouterSchema";
 import IBaseResource from "../schemas/IBaseResource";
 
 /**
@@ -11,22 +11,28 @@ import IBaseResource from "../schemas/IBaseResource";
  * @param {e.Response} res
  * @param {e.NextFunction} next
  */
-export async function userPermission(req: Request, res: Response, next: NextFunction) {
+export async function userPermission(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const routeSchema: RouterSchema = getSchema(req.originalUrl);
-  const resController: IResourceRepository<IBaseResource> = ControllerFactory.getRepository(routeSchema.table);
+  const resController: IResourceRepository<
+    IBaseResource
+  > = ControllerFactory.getRepository(routeSchema.getTable());
   let resource: IBaseResource;
   const id: string =
     req.body.id ||
     req.query.id ||
-    req.headers['id'] ||
+    req.headers.id ||
     req.params.id ||
-    req.params['id'];
+    req.params.id;
 
-  if (id === undefined || null || '') {
+  if (id === undefined || null || "") {
     return next();
   }
 
-  if (!routeSchema.options.isOwned) {
+  if (!routeSchema.getOptions().isOwned) {
     return next();
   }
 
@@ -41,9 +47,8 @@ export async function userPermission(req: Request, res: Response, next: NextFunc
   if (res.locals.user.id === `${resource.getUserId()}`) {
     return next();
   } else {
-    res.locals.customErrorMessage = 'Resource does not belong to user';
+    res.locals.customErrorMessage = "Resource does not belong to user";
     res.locals.error = 403;
     return next();
   }
 }
-

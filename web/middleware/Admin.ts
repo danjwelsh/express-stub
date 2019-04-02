@@ -1,8 +1,8 @@
-import ControllerFactory from '../repositories/RepositoryFactory';
-import { IResourceRepository } from '../repositories/IResourceRepository';
-import { IUser } from '../schemas/IUser';
-import { UserRole } from '../UserRole';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from "express";
+import { IResourceRepository } from "../repositories/IResourceRepository";
+import ControllerFactory from "../repositories/RepositoryFactory";
+import { IUser } from "../schemas/IUser";
+import { UserRole } from "../UserRole";
 
 /**
  * Verfiy a user's JWT token
@@ -10,11 +10,19 @@ import { NextFunction, Request, Response } from 'express';
  * @param {e.Response} res
  * @param {e.NextFunction} next
  */
-export async function checkAdmin(req: Request, res: Response, next: NextFunction) {
+export async function checkAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   let user: IUser;
-  const userRepository: IResourceRepository<IUser> = ControllerFactory.getRepository('user');
+  const userRepository: IResourceRepository<
+    IUser
+  > = ControllerFactory.getRepository("user");
   if (res.locals.error) {
-    if (!(res.locals.error === 403)) return next();
+    if (!(res.locals.error === 403)) {
+      return next();
+    }
   }
 
   try {
@@ -30,4 +38,3 @@ export async function checkAdmin(req: Request, res: Response, next: NextFunction
   }
   return next();
 }
-

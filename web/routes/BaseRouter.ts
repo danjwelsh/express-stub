@@ -1,5 +1,5 @@
-import { Handler, Router, Response } from 'express';
-import { HttpMethods } from '../HttpMethods';
+import { Handler, Response, Router } from "express";
+import { HttpMethods } from "../HttpMethods";
 
 /**
  * @apiDefine isAuthenticated
@@ -10,8 +10,14 @@ import { HttpMethods } from '../HttpMethods';
  * Base router class. All routers extend this class.
  */
 export abstract class BaseRouter {
-  router: Router;
-  fileUploadHandler: Handler;
+  public static errorCheck(res: Response): Error {
+    if (res.locals.error) {
+      return new Error(`${res.locals.error}`);
+    }
+    return null;
+  }
+  public router: Router;
+  public fileUploadHandler: Handler;
 
   protected constructor() {
     this.router = Router();
@@ -23,10 +29,7 @@ export abstract class BaseRouter {
    * @param {Methods} method
    * @param handler
    */
-  addRoute(
-    path: string,
-    method: HttpMethods,
-    handler: Handler) {
+  public addRoute(path: string, method: HttpMethods, handler: Handler) {
     switch (method) {
       case HttpMethods.GET:
         this.router.get(path, handler);
@@ -46,11 +49,11 @@ export abstract class BaseRouter {
    * Return the router.
    * @returns {e.Router}
    */
-  getRouter(): Router {
+  public getRouter(): Router {
     return this.router;
   }
 
-  setFileUploadHandler(handler: Handler): void {
+  public setFileUploadHandler(handler: Handler): void {
     this.fileUploadHandler = handler;
   }
 
@@ -60,12 +63,5 @@ export abstract class BaseRouter {
    */
   public addMiddleware(middleware: Handler): void {
     this.router.use(middleware);
-  }
-
-  public static errorCheck(res: Response): Error {
-    if (res.locals.error) {
-      return new Error(`${res.locals.error}`);
-    }
-    return null;
   }
 }

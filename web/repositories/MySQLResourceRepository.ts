@@ -1,12 +1,13 @@
-import {getManager, ObjectType} from 'typeorm';
-import {IResourceRepository} from "./IResourceRepository";
+import { getManager, ObjectType } from "typeorm";
 import IBaseMySQLResource from "../schemas/mysql/IBaseMySQLResource";
-import {UserRole} from "../UserRole";
+import { UserRole } from "../UserRole";
+import { IResourceRepository } from "./IResourceRepository";
 
 /**
  * Generic controller for resource of type T, must extend typeorm.BaseEntity.
  */
-export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IResourceRepository<T>{
+export class MySQLResourceRepository<T extends IBaseMySQLResource>
+  implements IResourceRepository<T> {
   private type: ObjectType<T>;
   private table: string;
 
@@ -19,8 +20,10 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
    * @param {number} id
    * @returns {Promise<T: BaseEntity>}
    */
-  async get(id: number): Promise<T> {
-    return await getManager().getRepository(this.type).findOne(id) as T;
+  public async get(id: number): Promise<T> {
+    return (await getManager()
+      .getRepository(this.type)
+      .findOne(id)) as T;
   }
 
   /**
@@ -28,8 +31,10 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
    * Get all entities
    * @returns {Promise<T[]: BaseEntity[]>}
    */
-  async getAll(): Promise<T[]> {
-    return await getManager().getRepository(this.type).find() as T[];
+  public async getAll(): Promise<T[]> {
+    return (await getManager()
+      .getRepository(this.type)
+      .find()) as T[];
   }
 
   /**
@@ -37,7 +42,7 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
    * @param {number} id
    * @returns {Promise<void>}
    */
-  async destroy(id: number): Promise<void> {
+  public async destroy(id: number): Promise<void> {
     const entity: T = await this.get(id);
     if (entity) {
       await entity.remove();
@@ -50,18 +55,23 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
    * @param data
    * @returns {Promise<T>}
    */
-  async edit(id: number, data: any): Promise<T> {
-    let entity: T = await this.get(id);
+  public async edit(id: number, data: any): Promise<T> {
+    const entity: T = await this.get(id);
     const entObj: any = entity.toJSONObject();
 
     Object.keys(data).forEach((key: string) => {
       entObj[key] = data[key];
     });
 
-    return await getManager().getRepository(this.type).save(entObj)
+    return await getManager()
+      .getRepository(this.type)
+      .save(entObj);
   }
 
-  async findManyWithFilter(filter: {}, options?: { limit: number; skip: number }): Promise<T[]> {
+  public async findManyWithFilter(
+    filter: {},
+    options?: { limit: number; skip: number }
+  ): Promise<T[]> {
     const queries: string[] = [];
     Object.keys(filter).forEach((key: string) => {
       queries.push(`${this.getTableName()}.${key} = :${key}`);
@@ -70,23 +80,23 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
     const whereQuery = queries.join(" AND ");
 
     if (options) {
-      return await getManager()
+      return (await getManager()
         .getRepository(this.type)
         .createQueryBuilder(this.getTableName())
         .where(whereQuery, filter)
         .take(options.limit)
         .skip(options.skip)
-        .getMany() as T[];
+        .getMany()) as T[];
     }
 
-    return await getManager()
+    return (await getManager()
       .getRepository(this.type)
       .createQueryBuilder(this.getTableName())
       .where(whereQuery, filter)
-      .getMany() as T[];
+      .getMany()) as T[];
   }
 
-  async findOneWithFilter(filter: {}): Promise<T> {
+  public async findOneWithFilter(filter: {}): Promise<T> {
     const queries: string[] = [];
     Object.keys(filter).forEach((key: string) => {
       queries.push(`${this.getTableName()}.${key} = :${key}`);
@@ -94,14 +104,14 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
 
     const whereQuery = queries.join(" AND ");
 
-    return await getManager()
+    return (await getManager()
       .getRepository(this.type)
       .createQueryBuilder(this.getTableName())
       .where(whereQuery, filter)
-      .getOne() as T;
+      .getOne()) as T;
   }
 
-  async getCount(filter: {}): Promise<number> {
+  public async getCount(filter: {}): Promise<number> {
     const queries: string[] = [];
     Object.keys(filter).forEach((key: string) => {
       queries.push(`${this.getTableName()}.${key} = :${key}`);
@@ -116,20 +126,22 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource> implements IR
       .getCount();
   }
 
-  getTableName(): string {
+  public getTableName(): string {
     return this.table;
   }
 
-  setTableName(table: string): void {
+  public setTableName(table: string): void {
     this.table = table;
   }
 
-  async store(data: any): Promise<T> {
+  public async store(data: any): Promise<T> {
     let entity: T;
     data.role = UserRole.USER;
 
     try {
-      entity = await getManager().getRepository(this.type).save(data);
+      entity = await getManager()
+        .getRepository(this.type)
+        .save(data);
     } catch (e) {
       throw e;
     }

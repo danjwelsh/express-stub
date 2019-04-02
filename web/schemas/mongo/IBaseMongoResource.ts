@@ -1,4 +1,4 @@
-import {Document, Schema} from 'mongoose';
+import { Document, Schema } from "mongoose";
 import IBaseResource from "../IBaseResource";
 
 export default interface IBaseMongoResource extends Document, IBaseResource {
