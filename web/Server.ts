@@ -6,6 +6,10 @@ import * as handler from './middleware/Handler';
 import {addRoutes} from './routes';
 import * as dotenv from 'dotenv';
 import {DatabaseFactory} from "./DatabaseFactory";
+import {Mongoose} from "mongoose";
+import {Connection} from "typeorm";
+import {DBType} from "./DBType";
+import {Server} from "http";
 
 dotenv.load();
 
@@ -16,6 +20,8 @@ dotenv.load();
  */
 export class App {
   public express: express.Express;
+  private connection: Mongoose | Connection;
+  private server: Server;
 
   constructor() {
     this.express = express();
@@ -77,8 +83,22 @@ export class App {
     this.express.use(handler.handleResponse);
   }
 
+  /**
+   * Connect to a database
+   * @returns {Promise<void>}
+   */
   private async connectToDB(): Promise<void> {
-    await DatabaseFactory.getConnection();
+    this.connection = await DatabaseFactory.getConnection();
+  }
+
+  private async disconnectFromDB(): Promise<void> {
+    switch (process.env.DB_TYPE) {
+      case DBType.Mongo:
+        await (this.connection as Mongoose).disconnect();
+        break;
+      case DBType.MySQL:
+        await (this.connection as Connection).close();
+    }
   }
 
   public async initialiseServer(): Promise<void> {
@@ -98,5 +118,15 @@ export class App {
     this.setAppSecret();
     this.addRoutes(this.express);
     this.setErrorHandler();
+  }
+
+  public startServer(port: number): Server {
+    this.server = this.express.listen(port);
+    return this.server;
+  }
+
+  public async tearDownServer(): Promise<void> {
+    await this.disconnectFromDB();
+    await this.server.close();
   }
 }

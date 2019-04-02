@@ -16,7 +16,7 @@ export function checkToken(req: express.Request,
       if (err) {
         res.locals.customErrorMessage = 'invalid token';
         res.locals.error = 401;
-        next();
+        return next();
       } else {
         res.locals.user = user;
         return next();
@@ -25,6 +25,6 @@ export function checkToken(req: express.Request,
   } else {
     res.locals.customErrorMessage = 'token not provided';
     res.locals.error = 401;
-    next();
+    return next();
   }
 }

@@ -10,25 +10,24 @@ import { NextFunction, Request, Response } from 'express';
  * @param {e.Response} res
  * @param {e.NextFunction} next
  */
-export function checkAdmin() {
+export async function checkAdmin(req: Request, res: Response, next: NextFunction) {
+  let user: IUser;
+  const userRepository: IResourceRepository<IUser> = ControllerFactory.getRepository('user');
+  if (res.locals.error) {
+    if (!(res.locals.error === 403)) return next();
+  }
 
-  return (req: Request, res: Response, next: NextFunction) => {
-    const userRepository: IResourceRepository<IUser> = ControllerFactory.getRepository('user');
-    if (res.locals.error) {
-      if (!(res.locals.error === 403)) return next();
-    }
+  try {
+    user = await userRepository.get(res.locals.user.id);
+  } catch (e) {
+    res.locals.customErrorMessage = e.message;
+    res.locals.error = 500;
+    return next();
+  }
 
-    userRepository.get(res.locals.user.id)
-      .then((user: IUser) => {
-        if (user.role === UserRole.ADMIN) {
-          res.locals.admin = UserRole.ADMIN;
-        }
-        return next();
-      })
-      .catch((e) => {
-        res.locals.customErrorMessage = e.message;
-        res.locals.error = 500;
-        return next();
-      });
-  };
+  if (user.role === UserRole.ADMIN) {
+    res.locals.admin = UserRole.ADMIN;
+  }
+  return next();
 }
+

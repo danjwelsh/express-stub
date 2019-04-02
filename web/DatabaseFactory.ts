@@ -12,18 +12,16 @@ export class DatabaseFactory {
    * Get a connection depending on DB_TYPE
    * @returns {Promise<void>}
    */
-  static async getConnection(dbType?: DBType): Promise<void> {
+  static async getConnection(dbType?: DBType): Promise<Mongoose | Connection> {
     const type: string = dbType ? dbType : process.env.DB_TYPE;
 
     switch (type) {
       case DBType.Mongo:
-        await this.getMongoConnection();
-        break;
+        return await this.getMongoConnection();
       case DBType.MySQL:
-        await this.getMySQLConnection();
-        break;
+        return await this.getMySQLConnection();
       default:
-        await this.getMongoConnection();
+        return await this.getMongoConnection();
     }
   }
 
