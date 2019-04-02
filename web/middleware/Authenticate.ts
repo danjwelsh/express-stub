@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import * as express from 'express';
-import { IUser } from '../schemas/User';
+import {IUser} from "../schemas/IUser";
 
 export function checkToken(req: express.Request,
                            res: express.Response,
@@ -10,13 +10,13 @@ export function checkToken(req: express.Request,
     req.query.token ||
     req.headers['x-access-token'] ||
     req.params.token;
-
+  
   if (token) {
     jwt.verify(token, process.env.SECRET, (err: Error, user: IUser) => {
       if (err) {
         res.locals.customErrorMessage = 'invalid token';
         res.locals.error = 401;
-        next();
+        return next();
       } else {
         res.locals.user = user;
         return next();
@@ -25,6 +25,6 @@ export function checkToken(req: express.Request,
   } else {
     res.locals.customErrorMessage = 'token not provided';
     res.locals.error = 401;
-    next();
+    return next();
   }
 }

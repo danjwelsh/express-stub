@@ -1,17 +1,29 @@
 import { describe } from 'mocha';
 import axios, { AxiosResponse } from 'axios';
-import { URL } from '../Commons';
+import {getUrl} from '../Commons';
 import { expect } from 'chai';
-import { IUser } from '../../web/schemas/User';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
-
-let user: IUser;
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+import {IUser} from "../../web/schemas/IUser";
+import {App} from "../../web/Server";
 
 describe('Auth', () => {
+  let app: App;
+  let user: IUser;
+  let userRepository: IResourceRepository<IUser>;
+  const port: number = 9897;
+
+  before(async () => {
+    app = new App();
+    await app.initialiseServer();
+    app.startServer(port);
+
+    userRepository = RepositoryFactory.getRepository('user');
+  });
+
   after(async () => {
     await userRepository.destroy(user._id);
+    await app.tearDownServer();
   });
 
   describe('Register', () => {
@@ -20,7 +32,7 @@ describe('Auth', () => {
         username: 'tester-auth',
         password: 'secret',
       };
-      const response: AxiosResponse = await axios.post(`${URL}/api/auth/register`, userData);
+      const response: AxiosResponse = await axios.post(`${getUrl(port)}/api/auth/register`, userData);
       expect(response.data.payload.token).to.have.length.above(10);
       user = response.data.payload.user;
     });
@@ -32,7 +44,7 @@ describe('Auth', () => {
       };
 
       try {
-        await axios.post(`${URL}/api/auth/register`, userData)
+        await axios.post(`${getUrl(port)}/api/auth/register`, userData)
       } catch (error) {
         expect(error.response.status).to.equal(403);
       }
@@ -46,7 +58,7 @@ describe('Auth', () => {
         password: 'secret',
       };
 
-      const response: AxiosResponse = await axios.post(`${URL}/api/auth/authenticate`, userData);
+      const response: AxiosResponse = await axios.post(`${getUrl(port)}/api/auth/authenticate`, userData);
       expect(response.data.payload.token).to.have.length.above(10);
     });
 
@@ -57,7 +69,7 @@ describe('Auth', () => {
       };
 
       try {
-        await axios.post(`${URL}/api/auth/authenticate`, userData)
+        await axios.post(`${getUrl(port)}/api/auth/authenticate`, userData)
       } catch (error) {
         expect(error.response.status).to.equal(401);
       }
@@ -70,7 +82,7 @@ describe('Auth', () => {
       };
 
       try {
-        await axios.post(`${URL}/api/auth/authenticate`, userData);
+        await axios.post(`${getUrl(port)}/api/auth/authenticate`, userData);
       } catch (error) {
         expect(error.response.status).to.equal(401);
       }

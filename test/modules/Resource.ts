@@ -1,16 +1,27 @@
 import {describe} from "mocha";
 import {expect} from "chai";
-import {IUser} from "../../web/schemas/User";
 import {IResourceRepository} from "../../web/repositories/IResourceRepository";
 import RepositoryFactory from "../../web/repositories/RepositoryFactory";
 import CryptoHelper from "../../web/CryptoHelper";
+import {IUser} from "../../web/schemas/IUser";
+import * as assert from "assert";
+import {DatabaseFactory} from "../../web/DatabaseFactory";
+import {DBType} from "../../web/DBType";
+import {Mongoose} from "mongoose";
 
 describe('Resource', () => {
-  const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
+  let userRepository: IResourceRepository<IUser>;
   let user: IUser;
+  let conn: Mongoose;
+
+  before(async () => {
+    conn = await DatabaseFactory.getConnection(DBType.Mongo) as Mongoose;
+    userRepository = RepositoryFactory.getRepository( 'user');
+  })
 
   after(async () => {
     await userRepository.destroy(user._id);
+    await conn.disconnect();
   })
 
   it('Should create a resource', async () => {
@@ -57,6 +68,6 @@ describe('Resource', () => {
   it('Should delete a resource', async () => {
     await userRepository.destroy(user._id);
     const stored = await userRepository.get(user._id);
-    expect(stored).to.be.null;
+    assert(stored === null || stored === undefined);
   });
 })

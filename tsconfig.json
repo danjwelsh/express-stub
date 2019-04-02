@@ -3,8 +3,10 @@
         "target": "es6",
         "module": "commonjs",
         "outDir": "dist",
-        "lib": ["es2018", "dom"],
-        "noImplicitAny": true
+        "lib": ["es2018", "dom", "es6"],
+        "noImplicitAny": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
     },
     "compileOnSave": true,
     "include": [

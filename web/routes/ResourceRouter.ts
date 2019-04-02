@@ -1,42 +1,23 @@
 import * as e from 'express';
 import RepositoryFactory from '../repositories/RepositoryFactory';
 import { IResourceRepository } from '../repositories/IResourceRepository';
-import { HttpMethods } from '../HttpMethods';
-import { checkToken } from '../middleware/Authenticate';
 import { Reply } from '../Reply';
-import IBaseMongoResource from '../schemas/IBaseMongoResource';
 import { BaseRouter } from './BaseRouter';
 import { getSchema } from './index';
 import IResourceRouter from './IResourceRouter';
 import RouterSchema from './RouterSchema';
-import { userPermission } from '../middleware/UserPermission';
-import { checkAdmin } from '../middleware/Admin';
-import { IUser } from '../schemas/User';
 import { Schema } from 'mongoose';
+import BaseResourceRouter from "./BaseResourceRouter";
+import IBaseResource from "../schemas/IBaseResource";
+import {IUser} from "../schemas/IUser";
 
-export default class MongoResourceRouter<T extends IBaseMongoResource>
-  extends BaseRouter
-  implements IResourceRouter<IBaseMongoResource> {
+export default class ResourceRouter<T extends IBaseResource>
+  extends BaseResourceRouter
+  implements IResourceRouter<IBaseResource> {
 
   constructor(table: string, options: {isProtected: boolean, isOwned: boolean}) {
     super();
-    if (options != null && options.isProtected) {
-      this.addMiddleware(checkToken);
-      this.addMiddleware(userPermission);
-    }
-
-    this.addMiddleware(checkAdmin);
-    this.addDefaultRoutes();
-  }
-
-  public addDefaultRoutes(): void {
-    this.addRoute('/:id', HttpMethods.GET, this.show);
-    this.addRoute('/:id', HttpMethods.DELETE, this.destroy);
-    this.addRoute('/:page/:limit', HttpMethods.GET, this.paged);
-    this.addRoute('/search/:field/:term', HttpMethods.GET, this.search);
-    this.addRoute('/update', HttpMethods.POST, this.update);
-    this.addRoute('/', HttpMethods.POST, this.store);
-    this.addRoute('/', HttpMethods.GET, this.index);
+    this.insertMiddleware(options);
   }
 
   public async store(req: e.Request, res: e.Response, next: e.NextFunction):
@@ -86,11 +67,11 @@ export default class MongoResourceRouter<T extends IBaseMongoResource>
       if (routeSchema.options.isOwned) {
         // remove from user.
         user = await userRepo.get(res.locals.user.id);
-        const resourceList: Schema.Types.ObjectId[] = user.getLinkedCollection(routeSchema.table);
-        const idx: number = resourceList.findIndex(resource => resource.toString() === id);
+        let resourceList: (Schema.Types.ObjectId | number)[] = await user.getLinkedCollection(routeSchema.table);
+        const idx: number = resourceList.findIndex(resource => `${resource}` === id);
         resourceList.splice(idx, 1);
         await user.setLinkedCollection(resourceList, routeSchema.table);
-        await user.save();
+        await userRepo.edit(user.getId(), user.toJSONObject());
       }
     } catch (e) {
       return next(e);

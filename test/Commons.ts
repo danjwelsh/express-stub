@@ -1,1 +1,3 @@
-export const URL = 'http://localhost:8888';
+export function getUrl(port: number): string {
+  return `http://localhost:${port}`;
+}

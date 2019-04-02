@@ -1,10 +1,16 @@
+import 'reflect-metadata';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as handler from './middleware/Handler';
-import * as mongoose from 'mongoose';
-import { addRoutes } from './routes';
+import {addRoutes} from './routes';
 import * as dotenv from 'dotenv';
+import {DatabaseFactory} from "./DatabaseFactory";
+import {Mongoose} from "mongoose";
+import {Connection} from "typeorm";
+import {DBType} from "./DBType";
+import {Server} from "http";
+
 dotenv.load();
 
 /**
@@ -14,32 +20,11 @@ dotenv.load();
  */
 export class App {
   public express: express.Express;
+  private connection: Mongoose | Connection;
+  private server: Server;
 
   constructor() {
     this.express = express();
-
-    /**
-     * Skip auth if in development.
-     */
-    if (process.env.LOCAL === 'true') {
-      mongoose.connect(process.env.MONGO_URI_LOCAL);
-    } else {
-      mongoose.connect(process.env.MONGO_URI, {
-        user: process.env.MONGODB_USER,
-        pass: process.env.MONGODB_PASS,
-        dbName: process.env.MONGODB_DATABASE,
-        authdb: 'admin',
-      });
-    }
-
-    // Descriptions of each in method declaration.
-    this.prepareStatic();
-    this.setViewEngine();
-    this.setBodyParser();
-    this.addCors();
-    this.setAppSecret();
-    this.addRoutes(this.express);
-    this.setErrorHandler();
   }
 
   /**
@@ -96,5 +81,52 @@ export class App {
    */
   private setErrorHandler(): void {
     this.express.use(handler.handleResponse);
+  }
+
+  /**
+   * Connect to a database
+   * @returns {Promise<void>}
+   */
+  private async connectToDB(): Promise<void> {
+    this.connection = await DatabaseFactory.getConnection();
+  }
+
+  private async disconnectFromDB(): Promise<void> {
+    switch (process.env.DB_TYPE) {
+      case DBType.Mongo:
+        await (this.connection as Mongoose).disconnect();
+        break;
+      case DBType.MySQL:
+        await (this.connection as Connection).close();
+    }
+  }
+
+  public async initialiseServer(): Promise<void> {
+    try {
+      await this.connectToDB();
+    } catch (e) {
+      console.error(e);
+      console.error('Could not connect to database');
+      process.exit(1);
+    }
+
+    // Descriptions of each in method declaration.
+    this.prepareStatic();
+    this.setViewEngine();
+    this.setBodyParser();
+    this.addCors();
+    this.setAppSecret();
+    this.addRoutes(this.express);
+    this.setErrorHandler();
+  }
+
+  public startServer(port: number): Server {
+    this.server = this.express.listen(port);
+    return this.server;
+  }
+
+  public async tearDownServer(): Promise<void> {
+    await this.disconnectFromDB();
+    await this.server.close();
   }
 }

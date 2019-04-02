@@ -1,5 +1,4 @@
 import { Express } from 'express';
-
 import { AuthRouter } from './api/AuthRouter';
 import RouterSchema from './RouterSchema';
 import ResourceRouterFactory from './ResourceRouterFactory';

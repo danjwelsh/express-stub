@@ -1,15 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { Reply } from '../../Reply';
-import { IUser } from '../../schemas/User';
 import AuthController from '../../controllers/AuthController';
 import { BaseRouter } from '../BaseRouter';
 import { HttpMethods as Methods } from '../../HttpMethods';
 import CryptoHelper from '../../CryptoHelper';
 import { IResourceRepository } from '../../repositories/IResourceRepository';
 import RepositoryFactory from '../../repositories/RepositoryFactory';
-
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
-const authController: AuthController = new AuthController();
+import {IUser} from "../../schemas/IUser";
 
 export class AuthRouter extends BaseRouter {
   /**
@@ -49,6 +46,7 @@ export class AuthRouter extends BaseRouter {
    */
   async authenticateUser(req: Request, res: Response, next: NextFunction):
     Promise<Response | void> {
+    const authController: AuthController = new AuthController();
     // Get username and password from request
     const username: string = req.body.username;
     const password: string = req.body.password;
@@ -104,9 +102,11 @@ export class AuthRouter extends BaseRouter {
    * @returns {Promise<e.Response | void>}
    */
   async registerUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    const authController: AuthController = new AuthController();
     // Get username and password
     const username: string = req.body.username;
     const password: string = req.body.password;
+    const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
     let user: IUser;
 
     // abort if either username or password are null
@@ -121,6 +121,7 @@ export class AuthRouter extends BaseRouter {
     try {
       user = await userRepository.store({ username, password: hash, iv });
     } catch (error) {
+      console.log(error);
       if (error.message.indexOf('duplicate key error') > -1) {
         return next(new Error('403'));
       }

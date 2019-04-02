@@ -1,21 +1,30 @@
 import { describe } from 'mocha';
-import axios, { AxiosError } from 'axios';
-import { URL } from '../Commons';
+import axios from 'axios';
+import {getUrl} from '../Commons';
 import { expect } from 'chai';
-import { IUser } from '../../web/schemas/User';
 import AuthController from '../../web/controllers/AuthController';
 import { IResourceRepository } from '../../web/repositories/IResourceRepository';
 import RepositoryFactory from '../../web/repositories/RepositoryFactory';
 import CryptoHelper from '../../web/CryptoHelper';
-
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
-const authController: AuthController = new AuthController();
-
-let user: IUser;
-let token: string;
+import {IUser} from "../../web/schemas/IUser";
+import {App} from "../../web/Server";
 
 describe('Middleware', () => {
+  let userRepository: IResourceRepository<IUser>;
+  let authController: AuthController;
+  let user: IUser;
+  let token: string;
+  let app: App;
+  const port: number = 9999;
+
   before(async () => {
+    app = new App();
+    await app.initialiseServer();
+    app.startServer(port);
+
+    userRepository = RepositoryFactory.getRepository('user');
+    authController = new AuthController();
+
     const username: string = 'tester-middleware';
     const password: string  = 'secret';
 
@@ -25,13 +34,14 @@ describe('Middleware', () => {
 
   after(async () => {
     await userRepository.destroy(user._id);
+    await app.tearDownServer();
   });
 
   describe('Authentication', () => {
     describe('Require token', () => {
       it('Should reject request if no token is given', async () => {
         try {
-          await axios.get(`${URL}/api/user/${user._id}`);
+          await axios.get(`${getUrl(port)}/api/user/${user._id}`);
         } catch (error) {
           expect(error.response.status).to.equal(401);
         }
@@ -40,7 +50,7 @@ describe('Middleware', () => {
       it('Should reject request if the token is invalid', async () => {
         const invToken = `${token}0`;
         try {
-          await axios.get(`${URL}/api/user/${user._id}`, { headers: { 'x-access-token': invToken } });
+          await axios.get(`${getUrl(port)}/api/user/${user._id}`, { headers: { 'x-access-token': invToken } });
         } catch (error) {
           expect(error.response.status).to.equal(401);
         }
