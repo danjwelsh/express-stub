@@ -66,6 +66,7 @@ describe('API', () => {
       require('./modules/User');
       require('./modules/Resource');
       require('./modules/MySQLResourceRepository');
+      require('./modules/MongoResourceRepository');
     });
   });
 });

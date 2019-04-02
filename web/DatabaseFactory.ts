@@ -2,6 +2,7 @@ import * as mongoose from "mongoose";
 import {Connection, createConnection} from "typeorm";
 import {User} from "./schemas/mysql/User";
 import {DBType} from "./DBType";
+import {Mongoose} from "mongoose";
 
 /**
  * Factory for generating database connections.
@@ -30,14 +31,14 @@ export class DatabaseFactory {
    * Connect to mongo
    * @returns {Promise<void>}
    */
-  private static async getMongoConnection(): Promise<void> {
+  public static async getMongoConnection(): Promise<Mongoose> {
     /**
      * Skip auth if in development.
      */
     if (process.env.LOCAL === 'true') {
-      await mongoose.connect(process.env.MONGO_URI_LOCAL);
+      return await mongoose.connect(process.env.MONGO_URI_LOCAL);
     } else {
-      await mongoose.connect(process.env.MONGO_URI, {
+      return await mongoose.connect(process.env.MONGO_URI, {
         user: process.env.MONGODB_USER,
         pass: process.env.MONGODB_PASS,
         dbName: process.env.MONGODB_DATABASE,
