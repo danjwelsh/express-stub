@@ -6,40 +6,39 @@ import {DBType} from "../web/DBType";
 describe('API', () => {
   process.env.TEST = 'true';
 
-  describe('MySQL', () => {
-    let server: Server;
-
-
-    before(async () => {
-      process.env.DB_TYPE = DBType.MySQL;
-
-      const app = new App();
-      const port: number = 8889;
-
-      await app.initialiseServer();
-
-      await new Promise(resolve => {
-        server = app.express.listen(port, resolve)
-      })
-
-      //server = app.express.listen(port);
-      console.log('started server')
-    });
-
-    after(async () => {
-      await server.close();
-    });
-
-    describe('API', () => {
-      /**
-       * Import tests from files
-       */
-      require('./modules/Auth');
-      require('./modules/Middleware');
-      require('./modules/User');
-      require('./modules/Resource');
-    })
-  });
+  //describe('MySQL', () => {
+  //  let server: Server;
+  //
+  //  before(async () => {
+  //    process.env.DB_TYPE = DBType.MySQL;
+  //
+  //    const app = new App();
+  //    const port: number = 8889;
+  //
+  //    await app.initialiseServer();
+  //
+  //    await new Promise(resolve => {
+  //      server = app.express.listen(port, resolve)
+  //    })
+  //
+  //    //server = app.express.listen(port);
+  //    console.log('started server')
+  //  });
+  //
+  //  after(async () => {
+  //    await server.close();
+  //  });
+  //
+  //  describe('API', () => {
+  //    /**
+  //     * Import tests from files
+  //     */
+  //    require('./modules/Auth');
+  //    require('./modules/Middleware');
+  //    require('./modules/User');
+  //    require('./modules/Resource');
+  //  })
+  //});
 
   describe('Mongo', () => {
     let server: Server;
@@ -66,6 +65,7 @@ describe('API', () => {
       require('./modules/Middleware');
       require('./modules/User');
       require('./modules/Resource');
+      require('./modules/MySQLResourceRepository');
     });
   });
 });

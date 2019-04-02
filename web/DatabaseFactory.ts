@@ -1,5 +1,5 @@
 import * as mongoose from "mongoose";
-import {createConnection} from "typeorm";
+import {Connection, createConnection} from "typeorm";
 import {User} from "./schemas/mysql/User";
 import {DBType} from "./DBType";
 
@@ -11,9 +11,10 @@ export class DatabaseFactory {
    * Get a connection depending on DB_TYPE
    * @returns {Promise<void>}
    */
-  static async getConnection(): Promise<void> {
-    console.log('#getConnection', process.env.DB_TYPE)
-    switch (process.env.DB_TYPE) {
+  static async getConnection(dbType?: DBType): Promise<void> {
+    const type: string = dbType ? dbType : process.env.DB_TYPE;
+
+    switch (type) {
       case DBType.Mongo:
         await this.getMongoConnection();
         break;
@@ -49,8 +50,8 @@ export class DatabaseFactory {
    * Connect to mysql
    * @returns {Promise<void>}
    */
-  private static async getMySQLConnection(): Promise<void> {
-    await createConnection({
+  public static async getMySQLConnection(): Promise<Connection> {
+    return await createConnection({
       type: "mysql",
       host: "mysql",
       port: 3306,
