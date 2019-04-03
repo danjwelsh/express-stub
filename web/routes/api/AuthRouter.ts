@@ -3,12 +3,12 @@ import * as HttpErrors from "http-errors";
 import AuthController from "../../controllers/AuthController";
 import CryptoHelper from "../../CryptoHelper";
 import { HttpMethods as Methods } from "../../HttpMethods";
+import { HttpResponseCodes } from "../../HttpResponseCodes";
 import { Reply } from "../../Reply";
 import { IResourceRepository } from "../../repositories/IResourceRepository";
 import RepositoryFactory from "../../repositories/RepositoryFactory";
 import { IUser } from "../../schemas/IUser";
 import { BaseRouter } from "../BaseRouter";
-import { HttpResponseCodes } from "../../HttpResponseCodes";
 
 export class AuthRouter extends BaseRouter {
   /**
