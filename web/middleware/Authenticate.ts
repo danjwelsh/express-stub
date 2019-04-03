@@ -1,7 +1,6 @@
+import { Unauthorized } from "@curveball/http-errors";
 import * as express from "express";
-import * as HttpErrors from "http-errors";
 import * as jwt from "jsonwebtoken";
-import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IUser } from "../schemas/IUser";
 
 /**
@@ -28,10 +27,7 @@ export function checkToken(
     jwt.verify(token, process.env.SECRET, (err: Error, user: IUser) => {
       if (err) {
         // Add error to locals
-        res.locals.error = HttpErrors(
-          HttpResponseCodes.Unauthorized,
-          "invalid token"
-        );
+        res.locals.error = new Unauthorized(err.message);
         return next();
       } else {
         // Add user to locals and move to next function if token is valid
@@ -41,10 +37,7 @@ export function checkToken(
     });
   } else {
     // No token, add error and move to error handler
-    res.locals.error = HttpErrors(
-      HttpResponseCodes.Unauthorized,
-      "token not provided"
-    );
+    res.locals.error = new Unauthorized("no token provided");
     return next();
   }
 }

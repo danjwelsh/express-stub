@@ -1,6 +1,5 @@
+import { Forbidden, InternalServerError } from "@curveball/http-errors";
 import { NextFunction, Request, Response } from "express";
-import * as HttpErrors from "http-errors";
-import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import ControllerFactory from "../repositories/RepositoryFactory";
 import { getSchema } from "../routes/index";
@@ -46,10 +45,7 @@ export async function userPermission(
     resource = await resController.get(id);
   } catch (e) {
     // Throw db error
-    res.locals.error = HttpErrors(
-      HttpResponseCodes.InternalServerError,
-      e.message
-    );
+    res.locals.error = new InternalServerError(e.message);
     return next();
   }
 
@@ -57,10 +53,7 @@ export async function userPermission(
   if (res.locals.user.id === `${resource.getUserId()}`) {
     return next();
   } else {
-    res.locals.error = HttpErrors(
-      HttpResponseCodes.Forbidden,
-      "Resource does not belong to user"
-    );
+    res.locals.error = new Forbidden("Resource does not belong to user");
     return next();
   }
 }

@@ -1,9 +1,8 @@
+import { BadRequest, Forbidden } from "@curveball/http-errors";
 import { NextFunction, Request, Response } from "express";
-import * as HttpErrors from "http-errors";
 import AuthController from "../../controllers/AuthController";
 import CryptoHelper from "../../CryptoHelper";
 import { HttpMethods as Methods } from "../../HttpMethods";
-import { HttpResponseCodes } from "../../HttpResponseCodes";
 import { Reply } from "../../Reply";
 import { IResourceRepository } from "../../repositories/IResourceRepository";
 import RepositoryFactory from "../../repositories/RepositoryFactory";
@@ -85,12 +84,7 @@ export class AuthRouter extends BaseRouter {
 
     // abort if either username or password are null
     if (!username || !password) {
-      return next(
-        HttpErrors(
-          HttpResponseCodes.BadRequest,
-          "username or password cannot be empty"
-        )
-      );
+      return next(new BadRequest("username or password cannot be empty"));
     }
 
     // Generate the hashed password
@@ -102,7 +96,7 @@ export class AuthRouter extends BaseRouter {
     } catch (error) {
       // If user name already exists throw 403
       if (error.message.indexOf("duplicate key error") > -1) {
-        return next(HttpErrors(HttpResponseCodes.Forbidden, error.message));
+        return next(new Forbidden(error.message));
       }
       return next(error);
     }

@@ -1,6 +1,10 @@
+import {
+  BadRequest,
+  HttpError,
+  InternalServerError,
+  NotFound
+} from "@curveball/http-errors";
 import * as e from "express";
-import * as HttpErrors from "http-errors";
-import { HttpError } from "http-errors";
 import { Schema } from "mongoose";
 import { HttpResponseCodes } from "../HttpResponseCodes";
 import { Reply } from "../Reply";
@@ -77,7 +81,7 @@ export default class ResourceRouter<T extends IBaseResource>
       resource = await cont.store(data);
     } catch (e) {
       // Throw db error
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     // Return the resource
@@ -137,7 +141,7 @@ export default class ResourceRouter<T extends IBaseResource>
         await userRepo.edit(user.getId(), user.toJSONObject());
       }
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, {}));
@@ -186,7 +190,7 @@ export default class ResourceRouter<T extends IBaseResource>
       }
     } catch (e) {
       // Throw db error
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, resources));
@@ -224,12 +228,7 @@ export default class ResourceRouter<T extends IBaseResource>
 
     // Check skip and limit are numbers
     if (isNaN(page) || isNaN(size)) {
-      return next(
-        HttpErrors(
-          HttpResponseCodes.BadRequest,
-          "page or size must be a number"
-        )
-      );
+      return next(new BadRequest("page or size must be a number"));
     }
 
     // Prevent negative skip
@@ -257,7 +256,7 @@ export default class ResourceRouter<T extends IBaseResource>
       // get count
       count = await cont.getCount(filter);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, { count, resources }));
@@ -286,7 +285,7 @@ export default class ResourceRouter<T extends IBaseResource>
 
     // Check error, override 403 if admin
     if (err) {
-      if (err.status === 403) {
+      if (err.httpStatus === HttpResponseCodes.Forbidden) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -299,12 +298,12 @@ export default class ResourceRouter<T extends IBaseResource>
     try {
       resource = await cont.get(id);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     // Throw 404 if not found
     if (!resource) {
-      return next(HttpErrors(HttpResponseCodes.NotFound));
+      return next(new NotFound());
     }
 
     return res.json(new Reply(200, "success", false, resource));
@@ -335,11 +334,9 @@ export default class ResourceRouter<T extends IBaseResource>
       userId: res.locals.user.id
     };
 
-    // todo: update for mysql, add search function to IResourceRepository and write db specific implementations.
-
     // Override 403
     if (err) {
-      if (err.status === 403) {
+      if (err.httpStatus === HttpResponseCodes.Forbidden) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -352,7 +349,7 @@ export default class ResourceRouter<T extends IBaseResource>
     try {
       resources = await cont.search(field, term, filter);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, resources));
@@ -381,7 +378,7 @@ export default class ResourceRouter<T extends IBaseResource>
 
     // Override 403 if admin
     if (err) {
-      if (err.status === 403) {
+      if (err.httpStatus === HttpResponseCodes.Forbidden) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -403,7 +400,7 @@ export default class ResourceRouter<T extends IBaseResource>
       resource = await cont.edit(req.body.id || req.body._id, data);
     } catch (e) {
       // Throw db error
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, resource));

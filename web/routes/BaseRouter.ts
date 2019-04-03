@@ -1,5 +1,5 @@
+import { HttpError } from "@curveball/http-errors";
 import { Handler, Response, Router } from "express";
-import { HttpError } from "http-errors";
 import { HttpMethods } from "../HttpMethods";
 
 /**

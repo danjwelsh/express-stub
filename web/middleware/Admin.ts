@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import * as HttpError from "http-errors";
 import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import ControllerFactory from "../repositories/RepositoryFactory";
 import { IUser } from "../schemas/IUser";
 import { UserRole } from "../UserRole";
+import { InternalServerError } from "@curveball/http-errors";
 
 /**
  * Verify a user's JWT token
@@ -24,7 +24,7 @@ export async function checkAdmin(
 
   // Check for errors from previous endpoint
   if (res.locals.error) {
-    if (!(res.locals.error.status === 403)) {
+    if (!(res.locals.error.status === HttpResponseCodes.Forbidden)) {
       return next();
     }
   }
@@ -34,10 +34,7 @@ export async function checkAdmin(
     user = await userRepository.get(res.locals.user.id);
   } catch (e) {
     // Add error to locals
-    res.locals.error = HttpError(
-      HttpResponseCodes.InternalServerError,
-      e.message
-    );
+    res.locals.error = new InternalServerError(e.message);
     return next();
   }
 
