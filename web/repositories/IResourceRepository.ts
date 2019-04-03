@@ -69,6 +69,15 @@ export interface IResourceRepository<T extends IBaseResource> {
   ): Promise<T[]>;
 
   /**
+   * Search for a resource where field contains query
+   *
+   * @param {string} field
+   * @param {string} query
+   * @returns {Promise<T[]>}
+   */
+  search(field: string, query: string, filter: {}): Promise<T[]>;
+
+  /**
    * Get a count of all resources matching filter.
    *
    * @param {{}} filter

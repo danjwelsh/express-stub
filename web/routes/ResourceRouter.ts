@@ -336,7 +336,6 @@ export default class ResourceRouter<T extends IBaseResource>
     };
 
     // todo: update for mysql, add search function to IResourceRepository and write db specific implementations.
-    filter[field] = { $regex: `${term}` };
 
     // Override 403
     if (err) {
@@ -351,7 +350,7 @@ export default class ResourceRouter<T extends IBaseResource>
 
     // Fetch resources
     try {
-      resources = await cont.findManyWithFilter(filter);
+      resources = await cont.search(field, term, filter);
     } catch (e) {
       return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }

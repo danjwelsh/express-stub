@@ -1,4 +1,4 @@
-import { getManager, ObjectType } from "typeorm";
+import { getManager, Like, ObjectType } from "typeorm";
 import IBaseMySQLResource from "../schemas/mysql/IBaseMySQLResource";
 import { UserRole } from "../UserRole";
 import { IResourceRepository } from "./IResourceRepository";
@@ -184,5 +184,22 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource>
       throw e;
     }
     return entity;
+  }
+
+  /**
+   * Search for a resource where field contains query
+   *
+   * @param {string} field
+   * @param {string} query
+   * @param {{}} filter
+   * @returns {Promise<T[]>}
+   */
+  public async search(field: string, query: string, filter: {}): Promise<T[]> {
+    const q: any = filter;
+    q[field] = Like(`%${query}%`);
+
+    return (await getManager()
+      .getRepository(this.type)
+      .find(q)) as T[];
   }
 }
