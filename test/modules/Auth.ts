@@ -13,19 +13,25 @@ describe("Auth", () => {
   let userRepository: IResourceRepository<IUser>;
   const port: number = 9897;
 
+  /*
+   * Create an instance of the server before running tests.
+   */
   before(async () => {
     app = new App();
     await app.initialiseServer();
     app.startServer(port);
 
+    // Get an instance of the user repository
     userRepository = RepositoryFactory.getRepository("user");
   });
 
+  // Tear down the server and disconnect from db.
   after(async () => {
     await userRepository.destroy(user._id);
     await app.tearDownServer();
   });
 
+  // Check if a user can register an account
   describe("Register", () => {
     it("Should register a user and return a token", async () => {
       const userData = {

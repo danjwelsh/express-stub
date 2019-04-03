@@ -1,6 +1,6 @@
 import { Model, model } from "mongoose";
-import { IMongoUser, userSchema } from "./schemas/mongo/IMongoUser";
 import IBaseMongoResource from "./schemas/mongo/IBaseMongoResource";
+import { IMongoUser, userSchema } from "./schemas/mongo/IMongoUser";
 
 // Export Models
 export default {

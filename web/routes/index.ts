@@ -5,14 +5,16 @@ import ResourceRouterFactory from "./ResourceRouterFactory";
 import RouterSchema from "./RouterSchema";
 
 /**
- * [use description]
- * @return       [description]
- * @param app
+ * Add routes to the router.
+ *
+ * @param {e.Express} app
+ * @returns {e.Express}
  */
-export function addRoutes(app: Express): Express {
+export default function addRoutes(app: Express): Express {
   app.use("/", new HomeRouter().getRouter());
   app.use("/api/auth", new AuthRouter().getRouter());
 
+  // Generate routes from the route schema
   routes.forEach((schema: RouterSchema) => {
     app.use(
       schema.getRoute(),
@@ -26,8 +28,14 @@ export function addRoutes(app: Express): Express {
   return app;
 }
 
-export default addRoutes;
-
+/*
+ * RouterSchema
+ *
+ * Add a router schema for each resource, requires:
+ *   Route
+ *   Table name
+ *   Resource Options
+ */
 export const routes: RouterSchema[] = [
   new RouterSchema(
     {
@@ -39,6 +47,7 @@ export const routes: RouterSchema[] = [
   )
 ];
 
+// Get a schema matching the route.
 export function getSchema(route: string): RouterSchema {
   return routes.find(
     (schema: RouterSchema) => route.indexOf(schema.getRoute()) > -1

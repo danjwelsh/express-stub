@@ -6,6 +6,10 @@ import { IResourceRepository } from "../repositories/IResourceRepository";
 import RepositoryFactory from "../repositories/RepositoryFactory";
 import { IUser } from "../schemas/IUser";
 
+/**
+ * AuthController
+ * Handles authenticating user.
+ */
 export default class AuthController {
   /**
    * Authenticate a user
@@ -21,12 +25,16 @@ export default class AuthController {
       IUser
     > = RepositoryFactory.getRepository("user");
     let user: IUser;
+
+    // Get user
     try {
       user = await userRepository.findOneWithFilter({ username });
     } catch (error) {
+      // Throw if db failure
       throw HttpError(HttpResponseCodes.InternalServerError, error.message);
     }
 
+    // Throw 401 if username is incorrect
     if (!user) {
       throw HttpError(HttpResponseCodes.Unauthorized);
     }

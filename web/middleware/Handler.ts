@@ -10,13 +10,15 @@ import { Reply } from "../Reply";
  * @param {e.NextFunction} next
  * @returns {Response}
  */
-const handleResponse: express.ErrorRequestHandler = (
+export const handleResponse: express.ErrorRequestHandler = (
   err: Error,
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
+  // Parse error to HTTPError
   const e: HttpError = err as HttpError;
+
   // Get error message from code
   const reply: Reply = new Reply(e.status, e.message, true, null);
 
@@ -39,6 +41,3 @@ const handleResponse: express.ErrorRequestHandler = (
   res.status(e.status);
   return res.json(reply);
 };
-
-// Export functions
-export { handleResponse };

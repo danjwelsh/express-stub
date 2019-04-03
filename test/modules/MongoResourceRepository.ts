@@ -8,17 +8,26 @@ import { IUser } from "../../web/schemas/IUser";
 import { IMongoUser } from "../../web/schemas/mongo/IMongoUser";
 import { UserRole } from "../../web/UserRole";
 
+/*
+ * Unit test the MongoResourceRepository
+ */
 describe("MongoResourceRepository.ts", () => {
   let connection: Mongoose;
   let user: IMongoUser;
   let userRepository: MongoResourceRepository<IMongoUser>;
 
+  /*
+   * Get a connection to the database.
+   */
   before(async () => {
     connection = await DatabaseFactory.getMongoConnection();
     userRepository = new MongoResourceRepository<IMongoUser>();
     userRepository.setTableName("user");
   });
 
+  /*
+   * Destroy the connection
+   */
   after(async () => {
     await userRepository.destroy(user._id as Schema.Types.ObjectId);
     await connection.disconnect();

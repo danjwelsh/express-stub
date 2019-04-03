@@ -8,7 +8,11 @@ import { IUser } from "../../web/schemas/IUser";
 import { App } from "../../web/Server";
 import { getUrl } from "../Commons";
 
-describe("IMongoUser", () => {
+/*
+ * Test user endpoints
+ * TODO: expand to test all resource endpoints as an integration test.
+ */
+describe("User", () => {
   let userRepository: IResourceRepository<IUser>;
   let authController: AuthController;
   let user: IUser;

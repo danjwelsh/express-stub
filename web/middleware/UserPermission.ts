@@ -8,7 +8,8 @@ import RouterSchema from "../routes/RouterSchema";
 import IBaseResource from "../schemas/IBaseResource";
 
 /**
- * Verfiy a user's JWT token
+ * Check a user has permission to access a resource
+ *
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {e.NextFunction} next
@@ -30,17 +31,21 @@ export async function userPermission(
     req.params.id ||
     req.params.id;
 
+  // If there is no id then a resource is not being accessed.
   if (id === undefined || null || "") {
     return next();
   }
 
+  // If the resource has no owner then anyone can view.
   if (!routeSchema.getOptions().isOwned) {
     return next();
   }
 
+  // If the resource has an owner, fetch resource and check user is the owner.
   try {
     resource = await resController.get(id);
   } catch (e) {
+    // Throw db error
     res.locals.error = HttpErrors(
       HttpResponseCodes.InternalServerError,
       e.message
@@ -48,6 +53,7 @@ export async function userPermission(
     return next();
   }
 
+  // Next if owner, throw 403 if not.
   if (res.locals.user.id === `${resource.getUserId()}`) {
     return next();
   } else {

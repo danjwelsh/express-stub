@@ -3,11 +3,6 @@ import { HttpError } from "http-errors";
 import { HttpMethods } from "../HttpMethods";
 
 /**
- * @apiDefine isAuthenticated
- * @apiHeader {String} x-access-token Users authentication token
- */
-
-/**
  * Base router class. All routers extend this class.
  */
 export abstract class BaseRouter {

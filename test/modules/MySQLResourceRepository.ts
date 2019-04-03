@@ -9,11 +9,17 @@ import { IUser } from "../../web/schemas/IUser";
 import { User } from "../../web/schemas/mysql/User";
 import { UserRole } from "../../web/UserRole";
 
+/*
+ * Unit test the MySQLResourceRepository
+ */
 describe("MySQLResourceRepository", () => {
   let connection: Connection;
   let user: IUser;
   let user2: IUser;
 
+  /*
+   * Connect to the MySQL db.
+   */
   before(async () => {
     connection = await DatabaseFactory.getMySQLConnection();
     const userRepository: IResourceRepository<
@@ -27,6 +33,9 @@ describe("MySQLResourceRepository", () => {
     });
   });
 
+  /*
+   * Remove stored resources and destroy connection.
+   */
   after(async () => {
     const userRepository: IResourceRepository<
       IUser

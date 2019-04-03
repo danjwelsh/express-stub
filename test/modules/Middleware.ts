@@ -17,6 +17,7 @@ describe("Middleware", () => {
   let app: App;
   const port: number = 9999;
 
+  // Create an instance of the server before tests
   before(async () => {
     app = new App();
     await app.initialiseServer();
@@ -28,6 +29,7 @@ describe("Middleware", () => {
     const username: string = "tester-middleware";
     const password: string = "secret";
 
+    // Store a user
     user = await userRepository.store({
       iv: CryptoHelper.getRandomString(16),
       password,
@@ -36,6 +38,7 @@ describe("Middleware", () => {
     token = await authController.generateToken(user);
   });
 
+  // Remove user and destroy server
   after(async () => {
     await userRepository.destroy(user._id);
     await app.tearDownServer();
@@ -63,4 +66,8 @@ describe("Middleware", () => {
       });
     });
   });
+
+  // TODO: Unit test user permissions middleware
+
+  // TODO: Unit test admin middleware
 });
