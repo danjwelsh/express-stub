@@ -1,5 +1,7 @@
+import * as HttpError from "http-errors";
 import * as jwt from "jsonwebtoken";
 import CryptoHelper from "../CryptoHelper";
+import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import RepositoryFactory from "../repositories/RepositoryFactory";
 import { IUser } from "../schemas/IUser";
@@ -22,18 +24,21 @@ export default class AuthController {
     try {
       user = await userRepository.findOneWithFilter({ username });
     } catch (error) {
-      throw error;
+      throw HttpError(HttpResponseCodes.InternalServerError, error.message);
     }
 
     if (!user) {
-      throw new Error("401");
+      throw HttpError(HttpResponseCodes.Unauthorized);
     }
 
     const hashedPassword: string = CryptoHelper.hashString(password, user.iv);
 
     // Compare passwords and abort if no match
     if (user.password !== hashedPassword) {
-      throw new Error("401");
+      throw HttpError(
+        HttpResponseCodes.Unauthorized,
+        "Username or password is incorrect."
+      );
     }
 
     return user;

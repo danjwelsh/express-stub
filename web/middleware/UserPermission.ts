@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import * as HttpErrors from "http-errors";
+import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import ControllerFactory from "../repositories/RepositoryFactory";
 import { getSchema } from "../routes/index";
@@ -39,16 +41,20 @@ export async function userPermission(
   try {
     resource = await resController.get(id);
   } catch (e) {
-    res.locals.customErrorMessage = e.message;
-    res.locals.error = 500;
+    res.locals.error = HttpErrors(
+      HttpResponseCodes.InternalServerError,
+      e.message
+    );
     return next();
   }
 
   if (res.locals.user.id === `${resource.getUserId()}`) {
     return next();
   } else {
-    res.locals.customErrorMessage = "Resource does not belong to user";
-    res.locals.error = 403;
+    res.locals.error = HttpErrors(
+      HttpResponseCodes.Forbidden,
+      "Resource does not belong to user"
+    );
     return next();
   }
 }

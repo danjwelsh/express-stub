@@ -1,5 +1,8 @@
 import * as e from "express";
+import * as HttpErrors from "http-errors";
+import { HttpError } from "http-errors";
 import { Schema } from "mongoose";
+import { HttpResponseCodes } from "../HttpResponseCodes";
 import { Reply } from "../Reply";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import RepositoryFactory from "../repositories/RepositoryFactory";
@@ -34,7 +37,7 @@ export default class ResourceRouter<T extends IBaseResource>
     const userId = res.locals.user.id;
     let resource: T;
     const data: any = {};
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
 
     if (err) {
       return next(err);
@@ -51,8 +54,7 @@ export default class ResourceRouter<T extends IBaseResource>
     try {
       resource = await cont.store(data);
     } catch (e) {
-      e.message = "500";
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     return res.json(new Reply(200, "success", false, resource));
@@ -71,7 +73,7 @@ export default class ResourceRouter<T extends IBaseResource>
     const userRepo: IResourceRepository<
       IUser
     > = RepositoryFactory.getRepository("user");
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
     let user: IUser;
 
     if (err) {
@@ -94,7 +96,7 @@ export default class ResourceRouter<T extends IBaseResource>
         await userRepo.edit(user.getId(), user.toJSONObject());
       }
     } catch (e) {
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     return res.json(new Reply(200, "success", false, {}));
@@ -109,7 +111,7 @@ export default class ResourceRouter<T extends IBaseResource>
     const cont: IResourceRepository<T> = RepositoryFactory.getRepository(
       routeSchema.getTable()
     );
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
     let resources: T[];
     const q: any = req.query;
     const filter: any = {};
@@ -130,8 +132,7 @@ export default class ResourceRouter<T extends IBaseResource>
         resources = await cont.findManyWithFilter(filter);
       }
     } catch (e) {
-      e.message = "500";
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     return res.json(new Reply(200, "success", false, resources));
@@ -146,7 +147,7 @@ export default class ResourceRouter<T extends IBaseResource>
     const cont: IResourceRepository<T> = RepositoryFactory.getRepository(
       routeSchema.getTable()
     );
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
     const page: number = parseInt(req.params.page, 10) || 0;
     const size: number = parseInt(req.params.limit, 10) || 0;
     const q: any = req.query;
@@ -164,7 +165,12 @@ export default class ResourceRouter<T extends IBaseResource>
     });
 
     if (isNaN(page) || isNaN(size)) {
-      return next(new Error("400"));
+      return next(
+        HttpErrors(
+          HttpResponseCodes.BadRequest,
+          "page or size must be a number"
+        )
+      );
     }
 
     if (err) {
@@ -184,8 +190,7 @@ export default class ResourceRouter<T extends IBaseResource>
 
       count = await cont.getCount(filter);
     } catch (e) {
-      e.message = "500";
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     return res.json(new Reply(200, "success", false, { count, resources }));
@@ -202,10 +207,10 @@ export default class ResourceRouter<T extends IBaseResource>
     const cont: IResourceRepository<T> = RepositoryFactory.getRepository(
       routeSchema.getTable()
     );
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
 
     if (err) {
-      if (err.message === "403") {
+      if (err.status === 403) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -217,12 +222,11 @@ export default class ResourceRouter<T extends IBaseResource>
     try {
       resource = await cont.get(id);
     } catch (e) {
-      e.message = "500";
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     if (!resource) {
-      return next(new Error("404"));
+      return next(HttpErrors(HttpResponseCodes.NotFound));
     }
 
     return res.json(new Reply(200, "success", false, resource));
@@ -238,7 +242,7 @@ export default class ResourceRouter<T extends IBaseResource>
     const cont: IResourceRepository<T> = RepositoryFactory.getRepository(
       routeSchema.getTable()
     );
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
     const field = req.params.field;
     const term = req.params.term;
     const filter: any = {
@@ -248,7 +252,7 @@ export default class ResourceRouter<T extends IBaseResource>
     filter[field] = { $regex: `${term}` };
 
     if (err) {
-      if (err.message === "403") {
+      if (err.status === 403) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -260,8 +264,7 @@ export default class ResourceRouter<T extends IBaseResource>
     try {
       resources = await cont.findManyWithFilter(filter);
     } catch (e) {
-      e.message = "500";
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     return res.json(new Reply(200, "success", false, resources));
@@ -278,10 +281,10 @@ export default class ResourceRouter<T extends IBaseResource>
     );
     let resource: T;
     const data: any = {};
-    const err: Error = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res);
 
     if (err) {
-      if (err.message === "403") {
+      if (err.status === 403) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -300,8 +303,7 @@ export default class ResourceRouter<T extends IBaseResource>
     try {
       resource = await cont.edit(req.body.id || req.body._id, data);
     } catch (e) {
-      e.message = "500";
-      return next(e);
+      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
     }
 
     return res.json(new Reply(200, "success", false, resource));

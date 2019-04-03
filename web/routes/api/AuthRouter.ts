@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import * as HttpErrors from "http-errors";
 import AuthController from "../../controllers/AuthController";
 import CryptoHelper from "../../CryptoHelper";
 import { HttpMethods as Methods } from "../../HttpMethods";
@@ -7,6 +8,7 @@ import { IResourceRepository } from "../../repositories/IResourceRepository";
 import RepositoryFactory from "../../repositories/RepositoryFactory";
 import { IUser } from "../../schemas/IUser";
 import { BaseRouter } from "../BaseRouter";
+import { HttpResponseCodes } from "../../HttpResponseCodes";
 
 export class AuthRouter extends BaseRouter {
   /**
@@ -57,8 +59,12 @@ export class AuthRouter extends BaseRouter {
 
     // abort if either username or password are null
     if (!username || !password) {
-      const e: Error = new Error("400");
-      return next(e);
+      return next(
+        HttpErrors(
+          HttpResponseCodes.BadRequest,
+          "username or password cannot be empty"
+        )
+      );
     }
 
     const iv: string = CryptoHelper.getRandomString(16);
@@ -67,9 +73,8 @@ export class AuthRouter extends BaseRouter {
     try {
       user = await userRepository.store({ username, password: hash, iv });
     } catch (error) {
-      console.log(error);
       if (error.message.indexOf("duplicate key error") > -1) {
-        return next(new Error("403"));
+        return next(HttpErrors(HttpResponseCodes.Forbidden, error.message));
       }
       return next(error);
     }

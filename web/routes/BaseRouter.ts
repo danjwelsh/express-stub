@@ -1,4 +1,5 @@
 import { Handler, Response, Router } from "express";
+import { HttpError } from "http-errors";
 import { HttpMethods } from "../HttpMethods";
 
 /**
@@ -10,9 +11,9 @@ import { HttpMethods } from "../HttpMethods";
  * Base router class. All routers extend this class.
  */
 export abstract class BaseRouter {
-  public static errorCheck(res: Response): Error {
+  public static errorCheck(res: Response): HttpError {
     if (res.locals.error) {
-      return new Error(`${res.locals.error}`);
+      return res.locals.error as HttpError;
     }
     return null;
   }

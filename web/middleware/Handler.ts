@@ -1,4 +1,5 @@
 import * as express from "express";
+import { HttpError } from "http-errors";
 import { Reply } from "../Reply";
 
 /**
@@ -15,9 +16,9 @@ const handleResponse: express.ErrorRequestHandler = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const code: number = parseInt(err.message, 10);
+  const e: HttpError = err as HttpError;
   // Get error message from code
-  const reply: Reply = getError(code);
+  const reply: Reply = new Reply(e.status, e.message, true, null);
 
   // Overwrite with custom error if given in local headers
   if (res.locals.customErrorMessage) {
@@ -26,46 +27,18 @@ const handleResponse: express.ErrorRequestHandler = (
 
   // Give full stacktrace if in debug mode
   if (process.env.DEBUG === "true") {
-    reply.payload = err.stack;
+    reply.payload = e.stack;
   }
 
   // Do not print full stack if unit testing
   if (process.env.TEST !== "true") {
-    console.error(err.stack);
+    console.error(e);
   }
 
   // Set status code of error message
-  res.status(code);
+  res.status(e.status);
   return res.json(reply);
 };
-
-/**
- * Get an error message from a code
- * @param {number} code
- * @returns {Reply}
- */
-function getError(code: number): Reply {
-  let message;
-  switch (code) {
-    case 401:
-      message = "unauthorised";
-      break;
-    case 403:
-      message = "forbidden";
-      break;
-    case 404:
-      message = "not found";
-      break;
-    case 500:
-      message = "server error";
-      break;
-    default:
-      message = "server error";
-      break;
-  }
-
-  return new Reply(code, message, true, null);
-}
 
 // Export functions
 export { handleResponse };

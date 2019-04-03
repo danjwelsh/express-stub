@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import * as HttpError from "http-errors";
+import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import ControllerFactory from "../repositories/RepositoryFactory";
 import { IUser } from "../schemas/IUser";
@@ -20,7 +22,7 @@ export async function checkAdmin(
     IUser
   > = ControllerFactory.getRepository("user");
   if (res.locals.error) {
-    if (!(res.locals.error === 403)) {
+    if (!(res.locals.error.status === 403)) {
       return next();
     }
   }
@@ -29,7 +31,10 @@ export async function checkAdmin(
     user = await userRepository.get(res.locals.user.id);
   } catch (e) {
     res.locals.customErrorMessage = e.message;
-    res.locals.error = 500;
+    res.locals.error = HttpError(
+      HttpResponseCodes.InternalServerError,
+      e.message
+    );
     return next();
   }
 

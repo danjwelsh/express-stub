@@ -1,6 +1,8 @@
 import * as express from "express";
+import * as HttpErrors from "http-errors";
 import * as jwt from "jsonwebtoken";
 import { IUser } from "../schemas/IUser";
+import { HttpResponseCodes } from "../HttpResponseCodes";
 
 export function checkToken(
   req: express.Request,
@@ -17,7 +19,10 @@ export function checkToken(
     jwt.verify(token, process.env.SECRET, (err: Error, user: IUser) => {
       if (err) {
         res.locals.customErrorMessage = "invalid token";
-        res.locals.error = 401;
+        res.locals.error = HttpErrors(
+          HttpResponseCodes.Unauthorized,
+          "invalid token"
+        );
         return next();
       } else {
         res.locals.user = user;
@@ -26,7 +31,10 @@ export function checkToken(
     });
   } else {
     res.locals.customErrorMessage = "token not provided";
-    res.locals.error = 401;
+    res.locals.error = HttpErrors(
+      HttpResponseCodes.Unauthorized,
+      "token not provided"
+    );
     return next();
   }
 }
