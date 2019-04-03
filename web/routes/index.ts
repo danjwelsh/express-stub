@@ -1,9 +1,8 @@
-import { Express } from 'express';
-
-import { AuthRouter } from './api/AuthRouter';
-import RouterSchema from './RouterSchema';
-import ResourceRouterFactory from './ResourceRouterFactory';
+import { Express } from "express";
+import { AuthRouter } from "./api/AuthRouter";
 import { HomeRouter } from "./Home";
+import ResourceRouterFactory from "./ResourceRouterFactory";
+import RouterSchema from "./RouterSchema";
 
 /**
  * [use description]
@@ -11,13 +10,17 @@ import { HomeRouter } from "./Home";
  * @param app
  */
 export function addRoutes(app: Express): Express {
-  app.use('/', new HomeRouter().getRouter());
-  app.use('/api/auth', new AuthRouter().getRouter());
+  app.use("/", new HomeRouter().getRouter());
+  app.use("/api/auth", new AuthRouter().getRouter());
 
   routes.forEach((schema: RouterSchema) => {
     app.use(
-      schema.route,
-      ResourceRouterFactory.getResourceRouter(schema.table, schema.options).getRouter());
+      schema.getRoute(),
+      ResourceRouterFactory.getResourceRouter(
+        schema.getTable(),
+        schema.getOptions()
+      ).getRouter()
+    );
   });
 
   return app;
@@ -26,14 +29,18 @@ export function addRoutes(app: Express): Express {
 export default addRoutes;
 
 export const routes: RouterSchema[] = [
-  new RouterSchema({
+  new RouterSchema(
+    {
       isOwned: false,
-      isProtected: true,
+      isProtected: true
     },
-    '/api/user',
-    'user'),
+    "/api/user",
+    "user"
+  )
 ];
 
 export function getSchema(route: string): RouterSchema {
-  return routes.find((schema: RouterSchema) => route.indexOf(schema.route) > -1);
+  return routes.find(
+    (schema: RouterSchema) => route.indexOf(schema.getRoute()) > -1
+  );
 }

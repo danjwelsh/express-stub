@@ -1,35 +1,54 @@
-import { describe } from 'mocha';
-import axios, { AxiosResponse } from 'axios';
-import { URL } from '../Commons';
-import { expect } from 'chai';
-import AuthController from '../../web/controllers/AuthController';
-import { IUser } from '../../web/schemas/User';
-import { IResourceRepository } from '../../web/repositories/IResourceRepository';
-import RepositoryFactory from '../../web/repositories/RepositoryFactory';
+import axios, { AxiosResponse } from "axios";
+import { expect } from "chai";
+import { describe } from "mocha";
+import AuthController from "../../web/controllers/AuthController";
+import { IResourceRepository } from "../../web/repositories/IResourceRepository";
+import RepositoryFactory from "../../web/repositories/RepositoryFactory";
+import { IUser } from "../../web/schemas/IUser";
+import { App } from "../../web/Server";
+import { getUrl } from "../Commons";
 
-const userRepository: IResourceRepository<IUser> = RepositoryFactory.getRepository('user');
-const authController: AuthController = new AuthController();
+describe("IMongoUser", () => {
+  let userRepository: IResourceRepository<IUser>;
+  let authController: AuthController;
+  let user: IUser;
+  let token: string;
+  let app: App;
+  const port: number = 9896;
 
-let user: IUser;
-let token: string;
-
-describe('User', () => {
   before(async () => {
-    const username: string = 'tester-user';
-    const password: string  = 'secret';
+    app = new App();
+    await app.initialiseServer();
+    app.startServer(port);
 
-    user = await userRepository.store({ username, password, iv: '12345678' });
+    userRepository = RepositoryFactory.getRepository("user");
+    authController = new AuthController();
+
+    const username: string = "tester-user";
+    const password: string = "secret";
+
+    user = await userRepository.store({ username, password, iv: "12345678" });
     token = await authController.generateToken(user);
   });
 
-  describe('Profile', () => {
-    it('Should return the users information', async () => {
-      const response: AxiosResponse = await axios.get(`${URL}/api/user/${user._id}`, { headers: { 'x-access-token': token } })
-      expect(response.data.payload.username).to.equal('tester-user');
+  after(async () => {
+    await app.tearDownServer();
+  });
+
+  describe("Profile", () => {
+    it("Should return the users information", async () => {
+      const response: AxiosResponse = await axios.get(
+        `${getUrl(port)}/api/user/${user._id}`,
+        { headers: { "x-access-token": token } }
+      );
+      expect(response.data.payload.username).to.equal("tester-user");
     });
 
-    it('Should delete users profile', async () => {
-      const response = await axios.delete(`${URL}/api/user/${user._id}`, { headers: { 'x-access-token': token } })
+    it("Should delete users profile", async () => {
+      const response = await axios.delete(
+        `${getUrl(port)}/api/user/${user._id}`,
+        { headers: { "x-access-token": token } }
+      );
       expect(response.status).to.equal(200);
     });
   });

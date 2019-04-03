@@ -1,10 +1,16 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
-import * as handler from './middleware/Handler';
-import * as mongoose from 'mongoose';
-import { addRoutes } from './routes';
-import * as dotenv from 'dotenv';
+import * as bodyParser from "body-parser";
+import * as cors from "cors";
+import * as dotenv from "dotenv";
+import * as express from "express";
+import { Server } from "http";
+import { Mongoose } from "mongoose";
+import "reflect-metadata";
+import { Connection } from "typeorm";
+import { DatabaseFactory } from "./DatabaseFactory";
+import { DBType } from "./DBType";
+import * as handler from "./middleware/Handler";
+import { addRoutes } from "./routes";
+
 dotenv.load();
 
 /**
@@ -14,22 +20,20 @@ dotenv.load();
  */
 export class App {
   public express: express.Express;
+  private connection: Mongoose | Connection;
+  private server: Server;
 
   constructor() {
     this.express = express();
+  }
 
-    /**
-     * Skip auth if in development.
-     */
-    if (process.env.LOCAL === 'true') {
-      mongoose.connect(process.env.MONGO_URI_LOCAL);
-    } else {
-      mongoose.connect(process.env.MONGO_URI, {
-        user: process.env.MONGODB_USER,
-        pass: process.env.MONGODB_PASS,
-        dbName: process.env.MONGODB_DATABASE,
-        authdb: 'admin',
-      });
+  public async initialiseServer(): Promise<void> {
+    try {
+      await this.connectToDB();
+    } catch (e) {
+      console.error(e);
+      console.error("Could not connect to database");
+      process.exit(1);
     }
 
     // Descriptions of each in method declaration.
@@ -42,27 +46,37 @@ export class App {
     this.setErrorHandler();
   }
 
+  public startServer(port: number): Server {
+    this.server = this.express.listen(port);
+    return this.server;
+  }
+
+  public async tearDownServer(): Promise<void> {
+    await this.disconnectFromDB();
+    await this.server.close();
+  }
+
   /**
    * Prepare the static folder.
    * Contains api docs.
    */
   private prepareStatic(): void {
-    this.express.use('/', express.static(`${__dirname}/../../static/apidoc`));
+    this.express.use("/", express.static(`${__dirname}/../../static/apidoc`));
   }
 
   /**
    * Set view engine for html.
    */
   private setViewEngine(): void {
-    this.express.set('view engine', 'ejs');
-    this.express.engine('html', require('ejs').renderFile);
+    this.express.set("view engine", "ejs");
+    this.express.engine("html", require("ejs").renderFile);
   }
 
   /**
    * Create and add the routers, must pass the app.
    * @param {e.Express} app
    */
-  private addRoutes (app: express.Express): void {
+  private addRoutes(app: express.Express): void {
     this.express = addRoutes(app);
   }
 
@@ -71,9 +85,11 @@ export class App {
    */
   private setBodyParser(): void {
     this.express.use(bodyParser.json());
-    this.express.use(bodyParser.urlencoded({
-      extended: true,
-    }));
+    this.express.use(
+      bodyParser.urlencoded({
+        extended: true
+      })
+    );
   }
 
   /**
@@ -81,14 +97,14 @@ export class App {
    */
   private addCors(): void {
     this.express.use(cors());
-    this.express.options('*', cors());
+    this.express.options("*", cors());
   }
 
   /**
    * Set the application secret to sign JWT tokens.
    */
   private setAppSecret(): void {
-    this.express.set('secret', process.env.SECRET);
+    this.express.set("secret", process.env.SECRET);
   }
 
   /**
@@ -96,5 +112,23 @@ export class App {
    */
   private setErrorHandler(): void {
     this.express.use(handler.handleResponse);
+  }
+
+  /**
+   * Connect to a database
+   * @returns {Promise<void>}
+   */
+  private async connectToDB(): Promise<void> {
+    this.connection = await DatabaseFactory.getConnection();
+  }
+
+  private async disconnectFromDB(): Promise<void> {
+    switch (process.env.DB_TYPE) {
+      case DBType.Mongo:
+        await (this.connection as Mongoose).disconnect();
+        break;
+      case DBType.MySQL:
+        await (this.connection as Connection).close();
+    }
   }
 }

@@ -12,17 +12,38 @@ services:
       - "./test:/app/test"
       depends_on:
         - mongo
+        - mysql
       links:
         - mongo
       environment:
+         LOCAL: ${LOCAL}
          MONGO_URI: ${MONGO_URI}
+         MONGO_URI_LOCAL: ${MONGO_URI_LOCAL}
          DEBUG: ${DEBUG}
          SECRET: ${SECRET}
+         DB_TYPE: ${DB_TYPE}
+         DB_USERNAME: ${DB_USERNAME}
+         DB_HOST: ${DB_HOST}
+         DB_PORT: ${DB_PORT}
+         DB_PASSWORD: ${DB_PASSWORD}
+         DB_DATABASE: ${DB_DATABASE}
   mongo:
     image: mongo
     ports:
       - "27017:27017"
+
+  mysql:
+    image: mysql:5.7
+    command: --explicit_defaults_for_timestamp
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: stub
     volumes:
-      - 'mongo:/data/db'
+      - mysql_database:/var/lib/mysql
+    restart: always
+
 volumes:
   mongo:
+  mysql_database:

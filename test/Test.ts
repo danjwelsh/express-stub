@@ -1,30 +1,15 @@
-import { describe } from 'mocha';
-import { App } from '../web/Server';
-import { Server } from 'http';
+import { describe } from "mocha";
 
-let server: Server;
-
-describe('api', () => {
-  before(() => {
-    const port: number = 8888;
-    process.env.TEST = 'true';
-
-    try {
-      server = new App().express.listen(port);
-    } catch (e) {
-      console.error(e);
-    }
-  });
-
-  after(async () => {
-    await server.close();
-  });
+describe("API", () => {
+  process.env.TEST = "true";
 
   /**
    * Import tests from files
    */
-  require('./modules/Auth');
-  require('./modules/Middleware');
-  require('./modules/User');
-  require('./modules/Resource');
+  require("./modules/Auth");
+  require("./modules/Middleware");
+  require("./modules/User");
+  require("./modules/Resource");
+  require("./modules/MySQLResourceRepository");
+  require("./modules/MongoResourceRepository");
 });

@@ -1,7 +1,7 @@
-import { Schema } from 'mongoose';
-import { getModel } from '../Models';
-import IBaseMongoResource from '../schemas/IBaseMongoResource';
-import { IResourceRepository } from './IResourceRepository';
+import { Schema } from "mongoose";
+import { getModel } from "../Models";
+import IBaseMongoResource from "../schemas/mongo/IBaseMongoResource";
+import { IResourceRepository } from "./IResourceRepository";
 
 /**
  * MongoDB specific resource controller.
@@ -26,7 +26,9 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @returns {Promise<T>}
    */
   public async edit(id: Schema.Types.ObjectId, data: {}): Promise<T> {
-    return await getModel(this.getTableName()).findByIdAndUpdate(id, data, { new: true }) as T;
+    return (await getModel(this.getTableName()).findByIdAndUpdate(id, data, {
+      new: true
+    })) as T;
   }
 
   /**
@@ -35,7 +37,7 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @returns {Promise<T>}
    */
   public async get(id: Schema.Types.ObjectId): Promise<T> {
-    return await getModel(this.getTableName()).findOne({ _id: id }) as T;
+    return (await getModel(this.getTableName()).findOne({ _id: id })) as T;
   }
 
   /**
@@ -44,19 +46,21 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @param options
    * @returns {Promise<T[]>}
    */
-  public async findManyWithFilter(filter: {}, options?: {
-    skip: number,
-    limit: number,
-  }): Promise<T[]> {
-    if (!options) {
-      return await getModel(this.getTableName())
-        .find(filter) as T[];
+  public async findManyWithFilter(
+    filter: {},
+    options?: {
+      skip: number;
+      limit: number;
     }
-    return await getModel(this.getTableName())
+  ): Promise<T[]> {
+    if (!options) {
+      return (await getModel(this.getTableName()).find(filter)) as T[];
+    }
+    return (await getModel(this.getTableName())
       .find(filter)
       .sort({ createdAt: -1 })
       .skip(options.skip)
-      .limit(options.limit) as T[];
+      .limit(options.limit)) as T[];
   }
 
   /**
@@ -65,7 +69,7 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @returns {Promise<T>}
    */
   public async findOneWithFilter(filter: {}): Promise<T> {
-    return await getModel(this.getTableName()).findOne(filter) as T;
+    return (await getModel(this.getTableName()).findOne(filter)) as T;
   }
 
   /**
@@ -73,9 +77,9 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @returns {Promise<T[]>}
    */
   public async getAll(): Promise<T[]> {
-    return await getModel(this.getTableName())
+    return (await getModel(this.getTableName())
       .find()
-      .sort({ createdAdded: -1 })as T[];
+      .sort({ createdAdded: -1 })) as T[];
   }
 
   /**
@@ -84,7 +88,7 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @returns {Promise<T>}
    */
   public async store(data: any): Promise<T> {
-    return await getModel(this.getTableName()).create(data) as T;
+    return (await getModel(this.getTableName()).create(data)) as T;
   }
 
   /**
@@ -93,7 +97,9 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
    * @returns {Promise<number>}
    */
   public async getCount(filter: {}): Promise<number> {
-    return await getModel(this.getTableName()).find(filter).count();
+    return await getModel(this.getTableName())
+      .find(filter)
+      .count();
   }
 
   /**

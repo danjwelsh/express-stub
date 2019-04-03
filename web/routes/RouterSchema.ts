@@ -1,38 +1,40 @@
 export default class RouterSchema {
-  private _options: {
-    isOwned: boolean,
-    isProtected: boolean,
-  };
-  private _route: string;
-  private _table: string;
+  private options: { isOwned: boolean; isProtected: boolean };
 
-  constructor(options: { isOwned: boolean; isProtected: boolean }, route: string, table: string) {
-    this._options = options;
-    this._route = route;
-    this._table = table;
+  private route: string;
+  private table: string;
+
+  constructor(
+    options: { isOwned: boolean; isProtected: boolean },
+    route: string,
+    table: string
+  ) {
+    this.options = options;
+    this.route = route;
+    this.table = table;
   }
 
-  get options(): { isOwned: boolean; isProtected: boolean } {
-    return this._options;
+  public getOptions(): { isOwned: boolean; isProtected: boolean } {
+    return this.options;
   }
 
-  set options(value: { isOwned: boolean; isProtected: boolean }) {
-    this._options = value;
+  public setOptions(value: { isOwned: boolean; isProtected: boolean }) {
+    this.options = value;
   }
 
-  get route(): string {
-    return this._route;
+  public getRoute(): string {
+    return this.route;
   }
 
-  set route(value: string) {
-    this._route = value;
+  public setRoute(value: string) {
+    this.route = value;
   }
 
-  get table(): string {
-    return this._table;
+  public getTable(): string {
+    return this.table;
   }
 
-  set table(value: string) {
-    this._table = value;
+  public setTable(value: string) {
+    this.table = value;
   }
 }

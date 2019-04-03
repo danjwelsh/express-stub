@@ -3,10 +3,20 @@ node_js:
  - "node"
 env:
   global:
-    - MONGO_URI=mongodb://127.0.0.1/stub
+    - MONGO_URI_LOCAL=mongodb://127.0.0.1/stub
     - SECRET=thisismyappsecret
     - DEBUG=true
     - TEST=true
-services: mongodb
+    - LOCAL=true
+    - DB_USERNAME=root
+    - DB_HOST=127.0.0.1
+    - DB_PORT=3306
+    - DB_PASSWORD=''
+    - DB_DATABASE=stub
+services:
+  - mongodb
+  - mysql
 before_script:
-- tsc
+  - tsc
+before_install:
+   - mysql -e 'CREATE DATABASE IF NOT EXISTS stub;'
