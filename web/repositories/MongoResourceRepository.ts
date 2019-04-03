@@ -117,4 +117,18 @@ export class MongoResourceRepository<T extends IBaseMongoResource>
   public setTableName(table: string): void {
     this.table = table;
   }
+
+  /**
+   * Search for resources where field matches regex
+   *
+   * @param {string} field
+   * @param {string} query
+   * @param {{}} filter
+   * @returns {Promise<T[]>}
+   */
+  public async search(field: string, query: string, filter: {}): Promise<T[]> {
+    const q: any = filter;
+    q[field] = { $regex: query };
+    return (await getModel(this.getTableName()).find(q)) as T[];
+  }
 }

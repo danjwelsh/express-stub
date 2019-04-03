@@ -12,7 +12,6 @@ COPY ./package.json /app/package.json
 # Install npm packages.
 RUN npm install
 
-COPY .env /app/.env
 COPY App.ts /app/App.ts
 COPY tsconfig.json /app/tsconfig.json
 COPY web /app/web

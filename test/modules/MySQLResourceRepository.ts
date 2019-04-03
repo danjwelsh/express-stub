@@ -9,11 +9,17 @@ import { IUser } from "../../web/schemas/IUser";
 import { User } from "../../web/schemas/mysql/User";
 import { UserRole } from "../../web/UserRole";
 
+/*
+ * Unit test the MySQLResourceRepository
+ */
 describe("MySQLResourceRepository", () => {
   let connection: Connection;
   let user: IUser;
   let user2: IUser;
 
+  /*
+   * Connect to the MySQL db.
+   */
   before(async () => {
     connection = await DatabaseFactory.getMySQLConnection();
     const userRepository: IResourceRepository<
@@ -27,6 +33,9 @@ describe("MySQLResourceRepository", () => {
     });
   });
 
+  /*
+   * Remove stored resources and destroy connection.
+   */
   after(async () => {
     const userRepository: IResourceRepository<
       IUser
@@ -103,6 +112,18 @@ describe("MySQLResourceRepository", () => {
       password: "password"
     });
     expect(result.password).to.equal("password");
+  });
+
+  it(" Should return a resource containing the search term", async () => {
+    const userRepository: IResourceRepository<
+      IUser
+    > = new MySQLResourceRepository<User>(User);
+    userRepository.setTableName("user");
+
+    const results: IUser[] = await userRepository.search("username", "-re", {});
+    results.forEach(result => {
+      expect(result.username.indexOf("-re")).to.be.greaterThan(-1);
+    });
   });
 
   it("Should get a count of all resources in the table", async () => {

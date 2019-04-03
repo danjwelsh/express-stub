@@ -1,6 +1,10 @@
+import {
+  BadRequest,
+  HttpError,
+  InternalServerError,
+  NotFound
+} from "@curveball/http-errors";
 import * as e from "express";
-import * as HttpErrors from "http-errors";
-import { HttpError } from "http-errors";
 import { Schema } from "mongoose";
 import { HttpResponseCodes } from "../HttpResponseCodes";
 import { Reply } from "../Reply";
@@ -14,9 +18,20 @@ import { getSchema } from "./index";
 import IResourceRouter from "./IResourceRouter";
 import RouterSchema from "./RouterSchema";
 
+/**
+ * ResourceRouter
+ *
+ * Generic router for all resources named in RouteSchema
+ */
 export default class ResourceRouter<T extends IBaseResource>
   extends BaseResourceRouter
   implements IResourceRouter<IBaseResource> {
+  /**
+   * Create the router
+   *
+   * @param {string} table
+   * @param {{isProtected: boolean; isOwned: boolean}} options
+   */
   constructor(
     table: string,
     options: { isProtected: boolean; isOwned: boolean }
@@ -25,6 +40,14 @@ export default class ResourceRouter<T extends IBaseResource>
     this.insertMiddleware(options);
   }
 
+  /**
+   * Store a resource
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async store(
     req: e.Request,
     res: e.Response,
@@ -37,29 +60,42 @@ export default class ResourceRouter<T extends IBaseResource>
     const userId = res.locals.user.id;
     let resource: T;
     const data: any = {};
-    const err: HttpError = BaseRouter.errorCheck(res);
+    const err: HttpError = BaseRouter.errorCheck(res); // check for errors from middleware.
 
     if (err) {
       return next(err);
     }
 
+    // Create an object from post data
     Object.keys(req.body).forEach((key: string) => {
       data[key] = req.body[key];
     });
 
+    // Add a user id if owned by the user
     if (routeSchema.getOptions().isOwned) {
       data.userId = userId;
     }
 
+    // Store
     try {
       resource = await cont.store(data);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      // Throw db error
+      return next(new InternalServerError(e.message));
     }
 
+    // Return the resource
     return res.json(new Reply(200, "success", false, resource));
   }
 
+  /**
+   * Destroy the resource
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async destroy(
     req: e.Request,
     res: e.Response,
@@ -76,15 +112,22 @@ export default class ResourceRouter<T extends IBaseResource>
     const err: HttpError = BaseRouter.errorCheck(res);
     let user: IUser;
 
+    // Throw errors from preceding middleware
     if (err) {
       return next(err);
     }
 
+    // Try to destroy
     try {
+      // Destroy resource
       await cont.destroy(id);
+
+      // If the resource is owned by the user...
       if (routeSchema.getOptions().isOwned) {
-        // remove from user.
+        // Get the user
         user = await userRepo.get(res.locals.user.id);
+
+        // Get the collection of linked resources
         const resourceList: Array<
           Schema.Types.ObjectId | number
         > = await user.getLinkedCollection(routeSchema.getTable());
@@ -92,16 +135,26 @@ export default class ResourceRouter<T extends IBaseResource>
           resource => `${resource}` === id
         );
         resourceList.splice(idx, 1);
+
+        // Update collection list and store
         await user.setLinkedCollection(resourceList, routeSchema.getTable());
         await userRepo.edit(user.getId(), user.toJSONObject());
       }
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, {}));
   }
 
+  /**
+   * Get all resources
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async index(
     req: e.Request,
     res: e.Response,
@@ -116,6 +169,7 @@ export default class ResourceRouter<T extends IBaseResource>
     const q: any = req.query;
     const filter: any = {};
 
+    // Apply a filter if given
     Object.keys(q).forEach((key: string) => {
       filter[key] = q[key];
     });
@@ -124,20 +178,32 @@ export default class ResourceRouter<T extends IBaseResource>
       return next(err);
     }
 
+    // Get resources
     try {
+      // Bypass owner restraint if admin
       if (res.locals.admin) {
         resources = await cont.getAll();
       } else {
+        // Return resources user owns
         filter.userId = res.locals.user.id;
         resources = await cont.findManyWithFilter(filter);
       }
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      // Throw db error
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, resources));
   }
 
+  /**
+   * Get paged resource
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async paged(
     req: e.Request,
     res: e.Response,
@@ -156,27 +222,26 @@ export default class ResourceRouter<T extends IBaseResource>
     let skip: number = (page - 1) * size || 0;
     let resources: T[];
 
-    if (skip < 0) {
-      skip = 0;
-    }
-
-    Object.keys(q).forEach((key: string) => {
-      filter[key] = q[key];
-    });
-
-    if (isNaN(page) || isNaN(size)) {
-      return next(
-        HttpErrors(
-          HttpResponseCodes.BadRequest,
-          "page or size must be a number"
-        )
-      );
-    }
-
     if (err) {
       return next(err);
     }
 
+    // Check skip and limit are numbers
+    if (isNaN(page) || isNaN(size)) {
+      return next(new BadRequest("page or size must be a number"));
+    }
+
+    // Prevent negative skip
+    if (skip < 0) {
+      skip = 0;
+    }
+
+    // Construct filter from params
+    Object.keys(q).forEach((key: string) => {
+      filter[key] = q[key];
+    });
+
+    // Return resources
     try {
       if (res.locals.admin) {
         resources = await cont.findManyWithFilter(filter);
@@ -188,14 +253,23 @@ export default class ResourceRouter<T extends IBaseResource>
         });
       }
 
+      // get count
       count = await cont.getCount(filter);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, { count, resources }));
   }
 
+  /**
+   * Get a single resource
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async show(
     req: e.Request,
     res: e.Response,
@@ -209,8 +283,9 @@ export default class ResourceRouter<T extends IBaseResource>
     );
     const err: HttpError = BaseRouter.errorCheck(res);
 
+    // Check error, override 403 if admin
     if (err) {
-      if (err.status === 403) {
+      if (err.httpStatus === HttpResponseCodes.Forbidden) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -219,19 +294,29 @@ export default class ResourceRouter<T extends IBaseResource>
       }
     }
 
+    // Fetch resource
     try {
       resource = await cont.get(id);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
+    // Throw 404 if not found
     if (!resource) {
-      return next(HttpErrors(HttpResponseCodes.NotFound));
+      return next(new NotFound());
     }
 
     return res.json(new Reply(200, "success", false, resource));
   }
 
+  /**
+   * Search for a resource
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async search(
     req: e.Request,
     res: e.Response,
@@ -249,10 +334,9 @@ export default class ResourceRouter<T extends IBaseResource>
       userId: res.locals.user.id
     };
 
-    filter[field] = { $regex: `${term}` };
-
+    // Override 403
     if (err) {
-      if (err.status === 403) {
+      if (err.httpStatus === HttpResponseCodes.Forbidden) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -261,15 +345,24 @@ export default class ResourceRouter<T extends IBaseResource>
       }
     }
 
+    // Fetch resources
     try {
-      resources = await cont.findManyWithFilter(filter);
+      resources = await cont.search(field, term, filter);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, resources));
   }
 
+  /**
+   * Update resource
+   *
+   * @param {e.Request} req
+   * @param {e.Response} res
+   * @param {e.NextFunction} next
+   * @returns {Promise<void | e.Response>}
+   */
   public async update(
     req: e.Request,
     res: e.Response,
@@ -283,8 +376,9 @@ export default class ResourceRouter<T extends IBaseResource>
     const data: any = {};
     const err: HttpError = BaseRouter.errorCheck(res);
 
+    // Override 403 if admin
     if (err) {
-      if (err.status === 403) {
+      if (err.httpStatus === HttpResponseCodes.Forbidden) {
         if (!res.locals.admin) {
           return next(err);
         }
@@ -293,6 +387,7 @@ export default class ResourceRouter<T extends IBaseResource>
       }
     }
 
+    // Create update object
     Object.keys(req.body).forEach((key: string) => {
       if (key === "_id") {
         return;
@@ -300,15 +395,22 @@ export default class ResourceRouter<T extends IBaseResource>
       data[key] = req.body[key];
     });
 
+    // Update resource
     try {
       resource = await cont.edit(req.body.id || req.body._id, data);
     } catch (e) {
-      return next(HttpErrors(HttpResponseCodes.InternalServerError, e.message));
+      // Throw db error
+      return next(new InternalServerError(e.message));
     }
 
     return res.json(new Reply(200, "success", false, resource));
   }
 
+  /**
+   * Set the router
+   *
+   * @param {e.Router} router
+   */
   public setRouter(router: e.Router): void {
     this.router = router;
   }

@@ -1,6 +1,9 @@
 import { Schema } from "mongoose";
 import { UserRole } from "../UserRole";
 
+/**
+ * Interface for a user.
+ */
 export interface IUser {
   _id: number | string | Schema.Types.ObjectId;
   username: string;

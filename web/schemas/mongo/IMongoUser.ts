@@ -8,6 +8,11 @@ const schemaOptions = {
   timestamps: true
 };
 
+/**
+ * IMongoUser
+ *
+ * Outlines a user mongo implementation
+ */
 export interface IMongoUser extends IBaseMongoResource, IUser {
   username: string;
   password: string;
@@ -27,6 +32,7 @@ export interface IMongoUser extends IBaseMongoResource, IUser {
   toJSONObject(): {};
 }
 
+// Schema for db
 export const userSchema = new Schema(
   {
     iv: {
@@ -52,6 +58,12 @@ export const userSchema = new Schema(
   schemaOptions
 );
 
+/**
+ * Get a collection the user owns
+ *
+ * @param {string} collectionName
+ * @returns {Promise<Schema.Types.ObjectId[]>}
+ */
 userSchema.methods.getLinkedCollection = async function(
   collectionName: string
 ): Promise<Schema.Types.ObjectId[]> {
@@ -59,6 +71,13 @@ userSchema.methods.getLinkedCollection = async function(
   return results.map(result => result.getId() as Schema.Types.ObjectId);
 };
 
+/**
+ * Set a collection the user owns
+ *
+ * @param {Schema.Types.ObjectId} collection
+ * @param {string} collectionName
+ * @returns {Promise<void>}
+ */
 userSchema.methods.setLinkedCollection = async function(
   collection: Schema.Types.ObjectId,
   collectionName: string
@@ -72,10 +91,20 @@ userSchema.methods.setLinkedCollection = async function(
   await this.save();
 };
 
+/**
+ * Get id
+ *
+ * @returns {Schema.Types.ObjectId}
+ */
 userSchema.methods.getId = function(): Schema.Types.ObjectId {
   return this._id;
 };
 
+/**
+ * Get table
+ *
+ * @returns {string}
+ */
 userSchema.methods.getTable = (): string => {
   return "user";
 };

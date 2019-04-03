@@ -1,5 +1,5 @@
+import { HttpError } from "@curveball/http-errors";
 import * as express from "express";
-import { HttpError } from "http-errors";
 import { Reply } from "../Reply";
 
 /**
@@ -10,7 +10,7 @@ import { Reply } from "../Reply";
  * @param {e.NextFunction} next
  * @returns {Response}
  */
-const handleResponse: express.ErrorRequestHandler = (
+export const handleResponse: express.ErrorRequestHandler = (
   err: Error,
   req: express.Request,
   res: express.Response,
@@ -18,12 +18,7 @@ const handleResponse: express.ErrorRequestHandler = (
 ) => {
   const e: HttpError = err as HttpError;
   // Get error message from code
-  const reply: Reply = new Reply(e.status, e.message, true, null);
-
-  // Overwrite with custom error if given in local headers
-  if (res.locals.customErrorMessage) {
-    reply.message = res.locals.customErrorMessage;
-  }
+  const reply: Reply = new Reply(e.httpStatus, err.message, true, null);
 
   // Give full stacktrace if in debug mode
   if (process.env.DEBUG === "true") {
@@ -36,9 +31,6 @@ const handleResponse: express.ErrorRequestHandler = (
   }
 
   // Set status code of error message
-  res.status(e.status);
+  res.status(e.httpStatus);
   return res.json(reply);
 };
-
-// Export functions
-export { handleResponse };

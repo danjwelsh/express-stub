@@ -1,3 +1,6 @@
+/**
+ * HTTP Response codes
+ */
 export enum HttpResponseCodes {
   OK = 200,
   BadRequest = 400,

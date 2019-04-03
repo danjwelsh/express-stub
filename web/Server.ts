@@ -9,7 +9,7 @@ import { Connection } from "typeorm";
 import { DatabaseFactory } from "./DatabaseFactory";
 import { DBType } from "./DBType";
 import * as handler from "./middleware/Handler";
-import { addRoutes } from "./routes";
+import addRoutes from "./routes";
 
 dotenv.load();
 

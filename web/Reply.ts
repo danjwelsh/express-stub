@@ -1,3 +1,6 @@
+/**
+ * Json response envelope
+ */
 export class Reply {
   constructor(
     public code: number,

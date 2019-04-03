@@ -9,6 +9,9 @@ import { IResourceRepository } from "../../web/repositories/IResourceRepository"
 import RepositoryFactory from "../../web/repositories/RepositoryFactory";
 import { IUser } from "../../web/schemas/IUser";
 
+/*
+ * Test generic resources through the generic resource repository interface.
+ */
 describe("Resource", () => {
   let userRepository: IResourceRepository<IUser>;
   let user: IUser;

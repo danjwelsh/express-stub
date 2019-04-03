@@ -1,11 +1,14 @@
-import * as HttpError from "http-errors";
+import { InternalServerError, Unauthorized } from "@curveball/http-errors";
 import * as jwt from "jsonwebtoken";
 import CryptoHelper from "../CryptoHelper";
-import { HttpResponseCodes } from "../HttpResponseCodes";
 import { IResourceRepository } from "../repositories/IResourceRepository";
 import RepositoryFactory from "../repositories/RepositoryFactory";
 import { IUser } from "../schemas/IUser";
 
+/**
+ * AuthController
+ * Handles authenticating user.
+ */
 export default class AuthController {
   /**
    * Authenticate a user
@@ -21,24 +24,25 @@ export default class AuthController {
       IUser
     > = RepositoryFactory.getRepository("user");
     let user: IUser;
+
+    // Get user
     try {
       user = await userRepository.findOneWithFilter({ username });
     } catch (error) {
-      throw HttpError(HttpResponseCodes.InternalServerError, error.message);
+      // Throw if db failure
+      throw new InternalServerError(error.message);
     }
 
+    // Throw 401 if username is incorrect
     if (!user) {
-      throw HttpError(HttpResponseCodes.Unauthorized);
+      throw new Unauthorized("Username does not exist");
     }
 
     const hashedPassword: string = CryptoHelper.hashString(password, user.iv);
 
     // Compare passwords and abort if no match
     if (user.password !== hashedPassword) {
-      throw HttpError(
-        HttpResponseCodes.Unauthorized,
-        "Username or password is incorrect."
-      );
+      throw new Unauthorized("Username or password is incorrect");
     }
 
     return user;

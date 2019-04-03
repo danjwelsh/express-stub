@@ -9,6 +9,9 @@ import { UserRole } from "../../UserRole";
 import { IUser } from "../IUser";
 import IBaseMySQLResource from "./IBaseMySQLResource";
 
+/**
+ * User MySQL implementation
+ */
 @Entity()
 export class User extends BaseEntity implements IBaseMySQLResource, IUser {
   @PrimaryGeneratedColumn()
@@ -39,6 +42,12 @@ export class User extends BaseEntity implements IBaseMySQLResource, IUser {
     return 0;
   }
 
+  /**
+   * Get a collection the user owns
+   *
+   * @param {string} collectionName
+   * @returns {Promise<number[]>}
+   */
   public async getLinkedCollection(collectionName: string): Promise<number[]> {
     const results: IBaseMySQLResource[] = (await getRepository(
       collectionName
@@ -46,6 +55,13 @@ export class User extends BaseEntity implements IBaseMySQLResource, IUser {
     return results.map(res => res.getId() as number);
   }
 
+  /**
+   * Set a collection the user owns
+   *
+   * @param {number[]} collection
+   * @param {string} collectionName
+   * @returns {Promise<void>}
+   */
   public setLinkedCollection(
     collection: number[],
     collectionName: string
@@ -53,6 +69,10 @@ export class User extends BaseEntity implements IBaseMySQLResource, IUser {
     return undefined;
   }
 
+  /**
+   * Convert to a json object for record updating and insertion
+   * @returns {{}}
+   */
   public toJSONObject(): {} {
     return {
       _id: this._id,

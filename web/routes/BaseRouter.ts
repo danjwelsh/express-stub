@@ -1,11 +1,6 @@
+import { HttpError } from "@curveball/http-errors";
 import { Handler, Response, Router } from "express";
-import { HttpError } from "http-errors";
 import { HttpMethods } from "../HttpMethods";
-
-/**
- * @apiDefine isAuthenticated
- * @apiHeader {String} x-access-token Users authentication token
- */
 
 /**
  * Base router class. All routers extend this class.
