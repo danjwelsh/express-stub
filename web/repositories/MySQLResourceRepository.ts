@@ -1,4 +1,4 @@
-import { getManager, Like, ObjectType } from "typeorm";
+import { FindConditions, getManager, Like, ObjectType } from "typeorm";
 import IBaseMySQLResource from "../schemas/mysql/IBaseMySQLResource";
 import { UserRole } from "../UserRole";
 import { IResourceRepository } from "./IResourceRepository";
@@ -200,6 +200,6 @@ export class MySQLResourceRepository<T extends IBaseMySQLResource>
 
     return (await getManager()
       .getRepository(this.type)
-      .find(q)) as T[];
+      .find(q as FindConditions<{}>)) as T[];
   }
 }

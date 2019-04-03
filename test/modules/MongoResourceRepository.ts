@@ -86,6 +86,13 @@ describe("MongoResourceRepository.ts", () => {
     expect(result.password).to.equal("password");
   });
 
+  it(" Should return a resource containing the search term", async () => {
+    const results: IUser[] = await userRepository.search("username", "-re", {});
+    results.forEach(result => {
+      expect(result.username.indexOf("-re")).to.be.greaterThan(-1);
+    });
+  });
+
   it("Should get a count of all resources in the table", async () => {
     const expectedCount: number = await getModel("user")
       .find({})
